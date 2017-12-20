@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+{% block body %}
+{% if session.logged_in %}
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-10"><h3>新建测试任务</h3></div>
+</div>
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-3" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:20px;"></div>
+    <form action="{{url_for('add_tasks')}}" method="post">
+      <div class="form-group">
+        <label>任务名称:</label>
+        <input type="text" class="form-control" placeholder="任务不能重名" name="name">
+      </div>
+      <div class="form-group">
+        <label>用例集:</label>
+        <select class="form-control" name="select_set">
+          <option value="none"> 请选择用例集 </option>
+          {% for set in case_set %} 
+          <option value={{set[0]}}>{{set[0]}}</option>
+          {% endfor %}
+        </select>
+      </div>
+	  <div class="form-group" style="float:right">
+      <button type="submit" class="btn btn-primary">确 定</button>
+	  </div>
+    </form>
+    <div class="row" style="height:10px;"></div>
+  </div>
+  <div class="col-md-2">
+			{% with messages = get_flashed_messages(with_categories=true) %}
+		{% for category, message in messages %}
+		<div class="alert alert-{{category}}">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+		  {% if category == 'danger' %}
+			<strong>错误：</strong> {{message}}
+		  {% elif category == 'warning' %}
+			<strong>警告：</strong> {{message}}
+		  {% elif category == 'info' %}
+			<strong>提示：</strong> {{message}}
+		  {% elif category == 'success' %}
+			<strong>成功：</strong> {{message}}
+		  {% else %}
+			<strong>信息：</strong> {{message}}
+		  {% endif %}
+		</div>
+		{% endfor %}
+		{% endwith %}
+  </div>
+  <div class="col-md-6"></div>
+</div>
+<br>
+{% endif %}
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-10">
+    <hr>
+    <h3>任务管理</h3>
+  </div>
+</div>
+  
+<div class="row">
+  <div class="col-md-1"></div>
+  <div style="padding:0px" class="col-md-10">
+  <table  class="table table table-hover" style="background:#FFF">
+  	<tr class="info">
+  		<td><b>序号</b></td>
+  		<td><b>任务名称</b></td>
+  		<td><b>用例集</b></td>
+  		<td><b>创建时间</b></td>
+  		<td><b>执行时间</b></td>
+  		<td><b>状态</b></td>
+  		<td><b>进度&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></td>
+  		<td><b>用例总数</b></td>
+  		<td><b>通过数</b></td>
+  		<td><b>通过率</b></td>
+  		<td><b>操作</b></td>
+  	</tr>
+    {% for ta in task %}
+  	  <form action="{{url_for('task_operate')}}" method="post">
+        <tr id={{ta[0]}}>
+      		<td>{{ta[0]}}</td>
+      		<td><input type="hidden" name="name" value={{ta[1]}}>{{ta[1]}}</input></td>
+      		<td>{{ta[2]}}</td>
+      		<td>{{ta[3]}}</td>
+      		<td>{{ta[4]}}</td>
+      		<td>{{ta[5]}}</td>
+      		<td>
+				<div class="progress progress-striped active">
+					<div class="progress-bar" style="width: {{ta[6]}};">{{ta[6]}}</div>
+				</div>
+			</td>
+      		<td>{{ta[7]}}</td>
+      		<td>{{ta[8]}}</td>
+      		<td>{{ta[9]}}</td>
+      		<td>
+    			{% if ta[5] == '未执行' or ta[5] == '已停止' %}
+    			<input id="status-{{ta[0]}}" class="btn btn-success" type=submit name=key value="启动"/>
+				{% elif ta[5] == '已完成'%}
+				<input class="btn btn-success" type=submit name=key value="已完成" disabled="disabled"/>
+				{% else %}
+    			<input class="btn btn-danger" type=submit name=key value="停止"/>
+    			{% endif %}
+				<input class="btn btn-danger" type=submit name=key value="删除"/>
+          		<input class="btn btn-primary" type=submit name=key value="详情"/>
+    		  </td>
+  	    </tr>
+	    </form>
+    {% else %}
+    <tr><td colspan="11">暂无任务</td></tr>
+    {% endfor %}
+  </table>
+  </div>
+</div>
+
+<script>
+var websocket_url = 'http://' + document.domain + ':' + location.port + '/task_refresh';
+var socket = io.connect(websocket_url);
+//发送消息
+socket.emit('request_for_response',{'taskid':'all'});
+//监听回复的消息
+socket.on('response',function(data){
+    if (data.code == '200'){
+		var s_msg = data.msg.replace(/\[/g,"").replace(/\]/g,"").replace(/\)/g,"").replace(/\ /g,"").replace("\(","");
+		var array_msg = s_msg.split('(');
+		for (var j=0;j<array_msg.length;j++){
+			var array_task = array_msg[j].split(',');
+			var tr = document.getElementById(array_task[0]);
+			var inp = document.getElementById('status-'+array_task[0]);
+			var tds = tr.getElementsByTagName("td");
+			tds[5].innerHTML = array_task[5].replace(/\'/g,"");
+			if (array_task[5] == '\'已完成\''){
+				inp.setAttribute("disabled", "disabled");
+				inp.setAttribute("value", "已完成");}
+			var div = tds[6].getElementsByTagName("div");
+			div[1].style = "width:" + array_task[6].replace(/\'/g,"");
+			div[1].innerHTML = array_task[6].replace(/\'/g,"");;
+			tds[8].innerHTML = array_task[8].replace(/\'/g,"");;
+			tds[9].innerHTML = array_task[9].replace(/\'/g,"");
+		}
+		//收到消息确认，继续监听
+		socket.emit('request_for_response',{'taskid':'all'});
+    }
+    else{
+        alert('ERROR: ' + 'push server failed');
+    }
+});
+
+</script>
+{% endblock %}

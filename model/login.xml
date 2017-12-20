@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<root>
+	<page>login.xml</page>
+	<step>
+		<elem module='login' type='input' locate='Username' method='input'>admin</elem>
+		<elem module='login' type='input' locate='Password' method='input'>abc123</elem>
+		<elem module='login' type='button' locate='登录' method='click'> </elem>
+	</step>
+	<complexity>1</complexity>
+</root>

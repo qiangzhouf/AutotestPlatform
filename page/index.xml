@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<root>
+	<url>new_viewer/view/index.html</url>
+	<frame/>
+	<html xpath='/html/body'>
+        <turn xpath='//*[i="@@"]'/>
+	</html>
+    <data>
+        <channel.html>实时展示</channel.html>
+        <taskAnalysis.html>任务分析</taskAnalysis.html>
+        <vidInfo.html>布控信息</vidInfo.html>
+        <vidApproval.html>布控审批</vidApproval.html>
+        <vidResult.html>布控结果</vidResult.html>
+        <carSearch.html>车辆检索</carSearch.html>
+        <peopleSearch.html>人员检索</peopleSearch.html>
+        <twoCarSearch.html>两轮车检索</twoCarSearch.html>
+        <threeCarSearch.html>三轮车检索</threeCarSearch.html>
+        <imgSearch.html>图像检索</imgSearch.html>
+        <collection.html>我的收藏</collection.html>
+        <statisticsAnalysis.html>数据统计</statisticsAnalysis.html>
+        <identifyService.html>识别服务器</identifyService.html>
+        <cameraManage.html>摄像机管理</cameraManage.html>
+        <platformManage.html>平台管理</platformManage.html>>
+        <menuManage.html>菜单管理</menuManage.html>
+        <unitManage.html>单位管理</unitManage.html>
+        <roleManage.html>角色管理</roleManage.html>
+        <userManage.html>用户管理</userManage.html>
+        <systemConfigure.html>系统配置</systemConfigure.html>
+        <crontask.html>任务调度</crontask.html>
+    </data>
+</root>

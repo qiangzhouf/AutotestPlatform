@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+{% block body %}
+{% if session.logged_in %}
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-10"><h3>新增用例集</h3></div>
+</div>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div style="padding:0px" class="col-md-4">
+		<table class="table" style="background:#FFF">
+			<tr class="info"><td colspan="3" align="center"><b>用例模板清单</b></td></tr>
+			<tr class="info">
+				<td><b>模板名称</b></td>
+				<td><b>用例数量</b></td>
+				<td><b>操作</b></td>
+			</tr>
+		  {% for case in model_case %}
+			<tr>
+				<form action="{{url_for('add_case')}}" method=post>
+					<td><input type="hidden" name="name" value={{case[1]}}>{{case[1]}}</input></td>
+					<td><input type="text" name="case_num" value="1"/></td>
+					<td>
+						<input class="btn btn-default" type="submit" value="添加"/>
+					</td>
+				</form>
+			<tr>
+		  {% else %}
+			<tr><td colspan="3">无用例模板</td></tr>
+		  {% endfor %}
+		</table>
+  </div>
+  <div class="col-md-1" style="text-align:center">
+
+  </div>
+  <div style="padding:0px" class="col-md-5">
+		<table class="table" style="background:#FFF">
+			<tr class="info"><td colspan="4" align="center"><b>新增用例集设置</b></td></tr>
+			<tr class="info">
+				<td><b>执行顺序</b></td>
+				<td><b>模板名称</b></td>
+				<td><b>用例数量</b></td>
+				<td><b>操作</b></td>
+			</tr>
+			{% for case in tmp_case %}
+			<tr>
+				<form action="{{url_for('del_case')}}" method=post>
+					<td><input type="hidden" name="ord" value={{loop.index}}>{{loop.index}}</input></td>
+					<td><input type="hidden" name="name" value={{case[1]}}>{{case[1]}}</input></td>
+					<td><input type="hidden" name="case_num" value={{case[2]}}>{{case[2]}}</input></td>
+					<td>
+						<input class="btn btn-default" type=submit value='移除'/>
+					</td>
+				</form>
+			</tr>
+			{% else %}
+			<tr><td colspan="4">未选择</td></tr>
+			{% endfor %}
+		</table>
+	</div>
+</div>
+
+<br>
+<br>
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-3" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:10px;"></div>
+    <form action="{{url_for('add_set')}}" method="post">
+      <div class="form-group">
+        <label>用例集名称:</label>
+        <input type="text" class="form-control" placeholder="用例集不能重名" name="cname"></input>
+      </div>
+	  <div class="form-group" style="float:right">
+      (&nbsp请先在上方选择用例模板和用例数量&nbsp)&nbsp&nbsp&nbsp<button type="submit" class="btn btn-primary">确 定</button>
+	  </div>
+	</form>
+    <div class="row" style="height:10px;"></div>
+  </div>
+  <div class="col-md-2">
+		{% with messages = get_flashed_messages(with_categories=true) %}
+		{% for category, message in messages %}
+		<div class="alert alert-{{category}}">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+		  {% if category == 'danger' %}
+			<strong>错误：</strong> {{message}}
+		  {% elif category == 'warning' %}
+			<strong>警告：</strong> {{message}}
+		  {% elif category == 'info' %}
+			<strong>提示：</strong> {{message}}
+		  {% elif category == 'success' %}
+			<strong>成功：</strong> {{message}}
+		  {% else %}
+			<strong>信息：</strong> {{message}}
+		  {% endif %}
+		</div>
+		{% endfor %}
+		{% endwith %}
+  </div>
+  <div class="col-md-5"></div>
+</div>
+<br>
+
+{% endif %}
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-10">
+    <hr>
+    <h3>已有用例集</h3>
+  </div>
+</div>   
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div style="padding:0px" class="col-md-10">
+  	<table class="table table-hover" style="background:#FFF">
+    	<tr class="info">
+    		<td><b>序号</b></td>
+    		<td><b>用例集名称</b></td>
+    		<td><b>创建时间</b></td>
+    		<td><b>用例总数</b></td>
+    		<td><b>模板覆盖率</b></td>
+    		<td><b>操作</b></td>
+    	</tr>
+      {% for case in case_set %}
+      <tr>
+    		<form action="{{url_for('case_set_operate')}}" method=post>
+      		<td>{{loop.index}}</td>
+      		<td><input type="hidden" name="name" value={{case[1]}}>{{case[1]}}</input></td>
+      		<td>{{case[2]}}</td>
+      		<td>{{case[3]}}</td>
+      		<td>{{case[4]}}</td>
+      		<td>
+      			<input class="btn btn-danger" type="submit" name="key" value='删除'/>
+      			<input class="btn btn-primary" type="submit" name="key" value='详情'/>
+      		</td>
+    		</form>
+  	  <tr>
+      {% else %}
+      <tr><td colspan="6">暂无用例集</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+{% endblock %}

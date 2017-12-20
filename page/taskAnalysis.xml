@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 页面url，是否有内联框架 -->
+	<url>taskAnalysis.html</url>
+	<frame/>
+
+	<!-- 页面布局抽象，主要获取xpath，“@@”是用于参数定位（html + module + types）-->
+	<html xpath='/html/body'>
+		<!-- 搜索条件输入模块 -->
+		<search xpath='//div[@class="search-content-parent"]'>
+			<input xpath='//input[@placeholder="@@"]'>
+				<radio xpath='/parent::*//a[text()="@@"]'/>
+				<close xpath='/../span/i'/>
+			</input>
+			<button xpath='//button[text()="@@"]'/>
+		</search>
+
+		<!-- 结果集模块 -->
+		<result xpath='//div[@class="result-content-parent"]'>
+			<type xpath='//div[@class="datagrid-body"]/table[@class="datagrid-btable"]/tbody/tr[contains(@class,"@@")]'>
+				<task xpath='[1]//tr'/>
+				<down xpath='/td[@field="taskName"]//span[1]'/>
+			</type>
+			<button xpath='//*[span="@@"]'/>
+			<head xpath='//tr[@class="datagrid-header-row"]/td[@field="@@"]//span[1]'/>
+			<table xpath='//table[@class="datagrid-btable"]/tbody/tr[contains(@class,"datagrid-row")]//span[text()="@@"]/../../..'>
+				<down xpath='/td[@field="taskName"]//span[1]'/>
+				<task xpath='/following-sibling::tr[1]//tr[contains(@class,"datagrid-row")]/td[@field="taskName"]//span[text()="@@"]/../../..'/>
+			</table>
+			<select xpath='//tr[contains(@class,"datagrid-row-selected")]'>
+				<info xpath='/td[@field="@@"]/div'/>
+				<progress xpath='/td[@field="progress"]/div/div/div'/>
+				<button xpath='/td[@field="nodeLocation"]//button[text()="@@"]'/>
+				<turn xpath='/td[@field="nodeLocation"]//i'/>
+			</select>>
+		</result>
+
+		<!-- 弹窗 -->
+		<window xpath='//div[@class="layui-layer-title" and contains(text(),"任务")]/..'>
+			<input xpath='//label[contains(text(),"@@")]/../div/input'>
+				<radio xpath='/parent::*//a[contains(text(),"@@")]'/>
+				<upload xpath='/parent::*//label[contains(text(),"@@")]'/>
+				<multiple xpath='[2]'/>
+			</input>
+			<single xpath='//label[contains(text(),"数据来源")]/..//label[contains(text(),"@@")]/i'/>
+			<check xpath='//label[contains(text(),"保存录像")]/..//i'/>
+			<button xpath='//button[text()="@@"]'/>
+			<close xpath='/span[@class="layui-layer-setwin"]/a'/>
+			<upload xpath='//input[@id="fileData"]'/>
+		</window>
+
+		<window2 xpath='//div[@class="layui-layer-title" and text()="信息"]/..'>
+			<info xpath='/div[@class="layui-layer-content"]'/>
+			<close xpath='/span[@class="layui-layer-setwin"]/a'/>
+			<button xpath='/div[@class="layui-layer-btn"]/a[text()="@@"]'/>
+		</window2>
+
+		<!-- 相机树 -->
+		<camera xpath='/div[contains(@class,"panel")]'>
+			<camera xpath='//span[text="@@"]'/>
+		</camera>
+
+		<time xpath='/div[6]'>
+			<hour xpath='/div[2]/div/div/div[contains(@class,"xdsoft_current")]'/>
+		</time>
+
+		<!-- 提示框 -->
+		<layer xpath='/div[contains(@class,"layui-layer-msg")]'>
+			<msg xpath='//div[@class="layui-layer-content"]'/>
+		</layer>
+		<load xpath=''>
+			<load xpath='//div[@type="loading"]'/>
+		</load>
+	</html>
+</root>

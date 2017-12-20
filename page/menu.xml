@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<root>
+	<url/>
+	<frame/>
+	<html xpath='/html/body'>
+		<menu xpath='//div[@class="menus"]'>
+			<menu xpath='/div[1]'/>
+			<top xpath='//a[@href="@@"]/../../../..'/>
+			<button xpath='//a[@href="@@"]'/>
+		</menu>
+	</html>
+</root>

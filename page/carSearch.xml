@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 页面url，是否有内联框架 -->
+	<url>carSearch.html</url>
+	<frame/>
+
+	<!-- 页面布局抽象，主要获取xpath，“@@”是用于参数定位（html + module + types）-->
+	<html xpath='/html/body'>
+		<!-- 搜索条件输入模块 -->
+		<search xpath='//div[@class="search-content-parent"]'>
+			<input xpath='//input[@placeholder="@@"]'>
+				<multiple xpath='/parent::*//label[contains(text(),"@@")]'/>
+				<type xpath='/parent::*//a[@title="@@"]/parent::*/span[1]'/>
+				<task xpath='/parent::*//a[@title="@@"]/parent::*/span[2]'/>
+				<car xpath='/parent::*//label[contains(text(),"@@")]/i'/>
+				<index xpath ='/parent::*//div[@class="dropdown-menu-right"]/div[**]//li[**]//label'/>
+			</input>
+			<button xpath='//button[text()="@@"]'/>
+		</search>
+
+		<!-- 结果集模块 -->
+		<result xpath='//div[@class="layer-laout"]'>
+			<select xpath='/div[2]'/>
+			<export xpath='/div[3]'/>
+			<turn xpath='/div[5]'/>
+			<back xpath='/div[4]'/>
+			<table xpath='//*[@id="viewListParent"]/div'/>
+			<tables xpath='//*[@id="viewListParent"]/div[@@]'>
+				<select xpath='/div[1]/div[1]'/>
+				<image xpath='/div[1]/img'/>
+				<car xpath='/div[2]/p[contains(text(),"@@")]'/>
+				<time xpath='/div[2]/p[contains(text(),"@@")]/em'/>
+				<detail xpath='//span[@class="bottom-toolbar"]/a[2]'/>
+				<collect xpath='//span[@class="bottom-toolbar"]/a[1]'/>
+			</tables>
+			<tr xpath='/div[6]//table[@class="datagrid-btable"]/tbody/tr[@@]'>
+				<td xpath='/td[@field="@@"]/div'/>
+			</tr>
+			<page xpath='//div[@class="page-bar"]'>
+				<fanye xpath='/i[@@]'/>
+				<input xpath='//input'/>
+				<pages xpath='/label'/>
+			</page>
+		</result>
+
+		<!-- 详细信息模块 -->
+		<detail xpath='/div[4]'>
+			<table xpath='//table//*[th="@@"]/td'/>
+			<image xpath='//*[@id="simAges"]/img'/>
+			<box xpath='//*[@id="carBox"]'/>
+		</detail>
+
+		<!-- 导出 -->
+		<export xpath='/div[3]/div[2]'>
+			<turn xpath='/div[4]'/>
+			<button xpath='/div[2]/button'/>
+			<counts xpath='/div[1]/div[4]/span'/>
+		</export>
+
+		<!-- 弹窗 -->
+		<layer xpath='/div[8]'>
+			<msg xpath='//div[@class="layui-layer-content"]'/>
+		</layer>
+	</html>
+</root>

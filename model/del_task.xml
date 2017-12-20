@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 用例执行的页面 -->
+	<page>taskAnalysis.xml</page>
+
+	<!-- 用例执行步骤 -->
+	<step>
+		<elem module='result' type='type' locate='row' method='getinfo'>
+            _count
+		</elem>
+		<elem module='' type='' locate='' method='tri'>
+			2:;info_list1;_loop
+		</elem>
+        <elem module='result' type='type' locate='row' method='click'>
+		</elem>
+        <elem module='result' type='button' locate='删除' method='click'>
+		</elem>
+		<elem module='window2' type='button' locate='确定' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+			删除成功;_break
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='getinfo'>
+            _count
+		</elem>
+		<elem module='' type='' locate='' method='tri'>
+			8:13;info_list0;_loop
+		</elem>
+		<elem module='result' type="type.down" locate='row.' method='click'>
+            collapsed;class;_attribute;_if;_single
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='click'>
+            _single
+		</elem>
+        <elem module='result' type='button' locate='删除' method='click'>
+		</elem>
+		<elem module='window2' type='button' locate='确定' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+			删除成功
+		</elem>
+		<elem module='result' type='type' locate='row' method='click'>
+		</elem>
+        <elem module='result' type='button' locate='删除' method='click'>
+		</elem>
+		<elem module='window2' type='button' locate='确定' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+			删除成功
+		</elem>
+    </step>
+
+	<!-- 用例随机数量 -->
+	<complexity>0</complexity>
+
+	<!-- 用例执行顺序 -->
+	<priority>d</priority>
+</root>

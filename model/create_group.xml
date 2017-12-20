@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 用例执行的页面 -->
+	<page>taskAnalysis.xml</page>
+
+	<!-- 用例执行步骤 -->
+	<step>
+		<elem module='result' type='head' locate='taskName' method='assert'>
+			任务名称
+		</elem>
+		<elem module='result' type='head' locate='taskType' method='assert'>
+			类别
+		</elem>
+		<elem module='result' type='head' locate='createTime' method='assert'>
+			创建时间
+		</elem>
+		<elem module='result' type='head' locate='progress' method='assert'>
+			进度
+		</elem>
+		<elem module='result' type='head' locate='taskStatus' method='assert'>
+			状态
+		</elem>
+		<elem module='result' type='head' locate='nodeLocation' method='assert'>
+			操作
+		</elem>
+		<elem module='result' type='button' locate='新增' method='click'>
+		</elem>
+		<elem module='window' type='input.radio' locate='分类.分组' method='click'>
+		</elem>
+		<elem module='window' type='input' locate='分组名称' method='input'>
+			示例
+		</elem>
+		<elem module='window' type='button' locate=' 确 定 ' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+			新建成功
+		</elem>
+		<elem module='result' type='table' locate='input_list1' method='click'>
+		</elem>
+		<elem module='result' type='button' locate='删除' method='click'>
+		</elem>
+		<elem module='window2' type='info' locate='' method='assert'>
+			数据删除后将无法还原,@确定继续删除吗?
+		</elem>
+		<elem module='window2' type='button' locate='取消' method='click'>
+		</elem>
+		<elem module='result' type='table' locate='input_list1' method='click'>
+		</elem>
+		<elem module='result' type='button' locate='删除' method='click'>
+		</elem>
+		<elem module='window2' type='button' locate='确定' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+			删除成功
+		</elem>
+		<elem module='result' type='table' locate='input_list1' method='click_not'>
+		</elem>
+		<elem module='result' type='button' locate='新增' method='click'>
+		</elem>
+		<elem module='window' type='input.radio' locate='分类.分组' method='click'>
+		</elem>
+		<elem module='window' type='input' locate='分组名称' method='input'>
+			案件1
+		</elem>
+		<elem module='window' type='button' locate=' 确 定 ' method='click'>
+		</elem>
+		<elem module='result' type='button' locate='新增' method='click'>
+		</elem>
+		<elem module='window' type='input.radio' locate='分类.分组' method='click'>
+		</elem>
+		<elem module='window' type='input' locate='分组名称' method='input'>
+			案件2
+		</elem>
+		<elem module='window' type='button' locate=' 确 定 ' method='click'>
+		</elem>
+		<elem module='result' type='button' locate='新增' method='click'>
+		</elem>
+		<elem module='window' type='input.radio' locate='分类.分组' method='click'>
+		</elem>
+		<elem module='window' type='input' locate='分组名称' method='input'>
+			案件3
+		</elem>
+		<elem module='window' type='button' locate=' 确 定 ' method='click'>
+		</elem>
+	</step>
+
+	<!-- 用例随机数量 -->
+	<complexity>0</complexity>
+
+	<!-- 用例执行顺序 -->
+	<priority>a</priority>
+</root>

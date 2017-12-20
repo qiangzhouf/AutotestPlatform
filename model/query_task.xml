@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 用例执行的页面 -->
+	<page>taskAnalysis.xml</page>
+
+	<!-- 用例执行步骤 -->
+	<step>
+		<elem module='search' type='input' locate='请输入任务名称' method='input'>
+            _video
+		</elem>
+        <elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+            查询无数据;_break
+		</elem>
+		<elem module='result' type='type' locate='row' method='assert'>
+            1;_len
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='assert'>
+            1;_len
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='click'>
+			_try;_single
+		</elem>
+		<elem module='result' type='select.info' locate='.taskName' method='assert'>
+            info_list1
+		</elem>
+		<elem module='result' type='select.info' locate='.taskStatus' method='getinfo'>
+		</elem>
+		<elem module='result' type='select.info' locate='.progress' method='assert'>
+			info_list2;_progress
+		</elem>
+		<elem module='result' type='select.button' locate='.停止' method='click'>
+			info_list2;_if;_single
+		</elem>
+		<elem module='' type='' locate='' method='tri'>
+			3;_wait
+		</elem>
+		<elem module='result' type='select.info' locate='.taskStatus' method='assert'>
+			已完成;已停止
+		</elem>
+		<elem module='result' type='select.info' locate='.createTime' method='getinfo'>
+		</elem>
+		<elem module='search' type='input.radio' locate='状态.分析中' method='click'>
+		</elem>
+		<elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='result' type='type' locate='row' method='assert'>
+            _elem;_not
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='assert'>
+            _elem;_not
+		</elem>
+		<elem module='search' type='input.close' locate='状态.' method='click'>
+			_single
+		</elem>
+		<elem module='search' type='input' locate='状态' method='click'>
+		</elem>
+		<elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='result' type='type' locate='row' method='assert'>
+            1;_len
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='assert'>
+            1;_len
+		</elem>
+		<elem module='search' type='input.radio' locate='类别.实时视频' method='click'>
+		</elem>
+		<elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='result' type='type' locate='row' method='assert'>
+            _elem;_not
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='assert'>
+            _elem;_not
+		</elem>
+		<elem module='search' type='input.close' locate='类别.' method='click'>
+			_single
+		</elem>
+		<elem module='search' type='input' locate='类别' method='click'>
+		</elem>
+		<elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='result' type='type' locate='row' method='assert'>
+            1;_len
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='assert'>
+            1;_len
+		</elem>
+
+		<elem module='search' type='input' locate='结束时间' method='input'>
+			info_list3;_little;_time
+		</elem>
+		<elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='result' type='type' locate='row' method='assert'>
+            _elem;_not
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='assert'>
+            _elem;_not
+		</elem>
+		<elem module='search' type='input' locate='结束时间' method='input'>
+			info_list3;_time
+		</elem>
+		<elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='result' type='type' locate='row' method='assert'>
+            1;_len
+		</elem>
+		<elem module='result' type='type.task' locate='tree.' method='assert'>
+            1;_len
+		</elem>
+		<elem module='result' type='type' locate='row' method='click'>
+		</elem>
+		<elem module='result' type='button' locate='删除' method='click'>
+		</elem>
+		<elem module='window2' type='button' locate='确定' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+			删除分组失败，请先删除分组下的所有任务
+		</elem>
+
+
+    </step>
+
+	<!-- 用例随机数量 -->
+	<complexity>10</complexity>
+
+	<!-- 用例执行顺序 -->
+	<priority>c</priority>
+</root>

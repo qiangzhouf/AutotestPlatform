@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 用例执行的页面 -->
+	<page>taskAnalysis.xml</page>
+
+	<!-- 用例执行步骤 -->
+	<step>
+		<elem module='result' type='button' locate='新增' method='click'>
+		</elem>
+		<elem module='window' type='input.radio' locate='分类.任务' method='click'>
+		</elem>
+        <elem module='window' type='input' locate='任务名称' method='input'>
+            _video
+		</elem>
+        <elem module='window' type='input.radio' locate='分组:.##' method='click'>
+            ;案件1,案件2,案件3,_radio
+		</elem>
+        <elem module='window' type='input.radio' locate='任务类别.离线视频文件' method='click'>
+		</elem>
+        <elem module='window' type='single' locate='本地文件' method='click'>
+		</elem>
+        <elem module='window' type='upload' locate='' method='input'>
+            info_list1;_path
+        </elem>
+        <elem module='load' type='load' locate='' method='assert'>
+            _not;_wait
+		</elem>
+        <elem module='window' type='input' locate='开始时间' method='input'>
+            today;_time
+        </elem>
+        <elem module='window' type='input.radio' locate='识别服务器.##' method='click'>
+            ;92
+        </elem>
+        <elem module='window' type='check' locate='保存录像' method='assert'>
+            at;class;_attribute
+        </elem>
+        <elem module='window' type='button' locate=' 确 定 ' method='click'>
+		</elem>
+        <elem module='layer' type='msg' locate='' method='assert'>
+            任务名称已存在;_break
+		</elem>
+        <elem module='result' type="table.down" locate='input_list2.' method='click'>
+            collapsed;class;_attribute;_if;_single
+		</elem>
+        <elem module='result' type="table.task" locate='input_list2.info_list1' method='click'>
+            _single
+		</elem>
+        <elem module='result' type="select.info" locate='.taskType' method='assert'>
+            离线视频文件
+		</elem>
+        <elem module='result' type="select.info" locate='.createTime' method='assert'>
+            _min;_t_point
+		</elem>
+        <elem module='result' type="select.progress" locate='.' method='assert'>
+            0%
+		</elem>
+        <elem module='result' type="select.info" locate='.taskStatus' method='assert'>
+            未识别
+		</elem>
+        <elem module='result' type="select.button" locate='.详情' method='click'>
+            _single
+		</elem>
+        <elem module='window' type="input" locate='分类' method='assert'>
+            任务
+		</elem>
+        <elem module='window' type="input" locate='任务名称' method='assert'>
+            info_list1
+		</elem>
+        <elem module='window' type="input" locate='分组:' method='assert'>
+            input_list2
+		</elem>
+        <elem module='window' type="input" locate='任务类别' method='assert'>
+            离线视频文件
+		</elem>
+        <elem module='window' type="single" locate='本地文件' method='assert'>
+            at;class;_attribute
+		</elem>
+        <elem module='window' type="input" locate='视频文件' method='assert'>
+            info_list1
+		</elem>
+        <elem module='window' type="input" locate='开始时间' method='assert'>
+            info_list2
+		</elem>
+        <elem module='window' type="input" locate='识别服务器' method='assert'>
+            input_list3
+		</elem>
+        <elem module='window' type="check" locate='保存录像' method='assert'>
+            at;class;_attribute
+		</elem>
+        <elem module='window' type="close" locate='' method='click'>
+		</elem>
+        <elem module='result' type="select.button" locate='.启动' method='click'>
+            _single
+		</elem>
+        <elem module='' type='' locate='' method='tri'>
+            3;_wait
+        </elem>
+        <elem module='result' type="select.info" locate='.taskStatus' method='assert'>
+            分析中
+		</elem>
+        <elem module='result' type="select.button" locate='.启动' method='assert'>
+            _elem;_not
+		</elem>
+    </step>
+
+	<!-- 用例随机数量 -->
+	<complexity>0</complexity>
+
+	<!-- 用例执行顺序 -->
+	<priority>b</priority>
+</root>

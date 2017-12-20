@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<root>
+	<page>menu.xml</page>
+	<step>
+		<elem module='menu' type='menu' locate='' method='click'>
+		</elem>
+		<elem module='menu' type='top' locate='**' method='click'>
+		</elem>
+		<elem module='menu' type='button' locate='**' method='click'>
+		</elem>
+	</step>
+	<complexity>1</complexity>
+</root>

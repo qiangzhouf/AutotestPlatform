@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{url_for('static', filename='model.js')}}"></script>
+
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-10"><h3>用例模板</h3></div>
+</div>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-5" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:20px;"></div>
+    <form class="form-inline">
+      <div class="form-group">
+        <label>模板名称:</label>
+        <input type="text" class="form-control" placeholder="模板不能重名" id="model_name">
+      </div>
+          <button class="btn btn-primary" id="new_model">新 增</button>
+      <div class="form-group" style="margin:0px 50px">
+        <label>模板查看:</label>
+        <select class="form-control" name="select_set" id="model">
+            <option value="none">请选择模板</option>
+            {% for model in models %}
+            <option value={{model}} class="dam">{{model}}</option>
+            {% endfor %}
+        </select>
+      </div>
+    </form>
+    <div class="row" style="height:20px;"></div>
+  </div>
+</div>
+<br>
+
+<div class="row" id="show" style="display:none">
+    <div class="col-md-1"></div>
+    <div class="col-md-10" style="padding: 0px">
+        <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;">
+            <tr id="model_params" class="info" id=-1>
+                <td><b>功能</b></td>
+                <td><b>步骤</b></td>
+                <td><b>模块</b></td>
+                <td><b>类型</b></td>
+                <td><b>定位</b></td>
+                <td><b>方法</b></td>
+                <td><b>内容</b></td>
+                <td align='center'>
+                    <button class="btn btn-danger" id="zmd">提交修改</button>
+                    <button class="btn btn-success" id="g" style="padding:0px 8px"><font size="4">+</font> </button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

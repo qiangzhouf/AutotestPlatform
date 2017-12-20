@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-10">
+    <h3>任务详情</h3>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div style="padding:0px" class="col-md-10">
+    <table  class="table table table-hover" style="background:#FFF">
+      <tr class="info">
+    		<td><b>序号</b></td>
+    		<td><b>用例名称</b></td>
+    		<td><b>模块</b></td>
+    		<td><b>执行结果</b></td>
+    		<td><b>执行步数</b></td>
+    		<td><b>操作</b></td>
+      </tr>
+      {% for case in cases %}
+      <tr>
+        <td>{{loop.index}}</td>
+        <td>{{case[1]}}</td>
+        <td>{{case[2]}}</td>
+        <td>
+            {% if case[3] == 0 %}
+            <span class="glyphicon glyphicon-minus-sign" style="color: rgb(180, 180, 180); font-size: 30px;"></span>
+            {% elif case[3] == 1 %}
+            <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 30px;"></span>
+            {% else %}
+            <span class="glyphicon glyphicon-ok-sign" style="color: rgb(0, 120, 0); font-size: 30px;"></span>
+            {% endif %}
+        </td>
+        <td>{{case[4]}}</td>
+        <td>
+          <button type="button" class="btn btn-primary" data-toggle="collapse" data-target={{'#'+case[1]}}>
+    	      详情
+          </button>
+        </td>
+      </tr>
+      <tr class="collapse" id={{case[1]}}><td colspan=6>
+        <div class="row" >
+          <div class="col-md-12">
+            <table class="table table table-hover" style="background:#FFF">
+              <tr class="danger">
+            		<td><b>执行顺序</b></td>
+            		<td><b>操作对象</b></td>
+            		<td><b>动作</b></td>
+            		<td><b>数据</b></td>
+            		<td><b>结果</b></td>
+            		<td><b>图片</b></td>
+              </tr>
+              {% for step in steps[case[1]] %}
+              <tr>
+                <td>{{step[6]}}</td>
+                <td>{{step[7]}}</td>
+                <td>{{step[8]}}</td>
+                <td>{{step[9]}}</td>
+                <td>
+                    {% if step[10] == 0 %}
+                    <span class="glyphicon glyphicon-minus-sign" style="color: rgb(180, 180, 180); font-size: 20px;"></span>
+                    {% elif step[10] == 1 %}
+                    <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 20px;"></span>
+                    {% else %}
+                    <span class="glyphicon glyphicon-ok-sign" style="color: rgb(0, 120, 0); font-size: 20px;"></span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if step[11] %}
+                    <a data-toggle="collapse" data-target="{{'#'+case[1]}}{{step[6]}}">截图</a>
+                    {% else %}
+                    --
+                    {% endif %}
+                </td>
+              </tr>
+              {% if step[11] %}
+                <tr class="collapse" id="{{case[1]}}{{step[6]}}"><td align="center" colspan="6">
+                    <div class="row">
+                    <img src="{{url_for('bug_img')}}?p={{step[11]}}" height="80%" width="80%">
+                    </div>
+                    <span style="color:#F00">{{step[11]}}</span>
+                </td></tr>
+              {% endif %}
+              {% else %}
+              <tr><td colspan="6">暂无用例集</td></tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </td></tr>
+      {% else %}
+      <tr><td colspan="6">暂无用例</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

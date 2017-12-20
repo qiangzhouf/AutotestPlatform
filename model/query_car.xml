@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 用例执行的页面 -->
+	<page>carSearch.xml</page>
+	
+	<!-- 用例执行步骤 -->
+	<step>
+		<elem module='search' type='input' locate='请输入号牌号码...' method='input'>
+			未识别
+		</elem>
+		<elem module='search' type='input' locate='任务>' method='click'>
+		</elem>
+		<elem module='search' type='input.type' locate='任务>.案件1' method='click'>
+			close;class;_attribute;_if;_single
+		</elem>
+		<elem module='search' type='input.type' locate='任务>.案件2' method='click'>
+			close;class;_attribute;_if;_single
+		</elem>
+		<elem module='search' type='input.type' locate='任务>.案件3' method='click'>
+			close;class;_attribute;_if;_single
+		</elem>
+		<elem module='search' type='input' locate='任务>' method='click'>
+		</elem>
+		<elem module='search' type='input.task' locate='任务>.##' method='click'>
+			;_video,_multiple
+		</elem>
+		<elem module='search' type='input.multiple' locate='车辆类型>.##' method='click'>
+			;轿车,面包车,卡车,大客车
+		</elem>
+		<elem module='search' type='input.multiple' locate='号牌类型>.##' method='click'>
+			;大型汽车号牌,小型汽车号牌,_multiple
+		</elem>
+		<elem module='search' type='input.car' locate='选择品牌>.##' method='click'>
+			;奥迪,奔驰,宝马,大众,别克,丰田,吉利,长安,五菱,三菱,宇通,金旅,_multiple
+		</elem>
+		<elem module='search' type='input.index' locate='选择型号>.' method='click'>
+			_index;_single
+		</elem>
+		<elem module='search' type='input.index' locate='选择年款>.' method='click'>
+			_save;_index;_single
+		</elem>
+		<elem module='search' type='input.multiple' locate='车辆颜色>.##' method='click'>
+			;黑色,蓝色,棕色,绿色,灰色,白色,红色,黄色,粉色,紫色,青色,深灰色,金色,_multiple
+		</elem>
+		<elem module='search' type='input' locate='开始时间' method='input'>
+			today;_time
+		</elem>
+		<elem module='search' type='input' locate='结束时间' method='input'>
+			today;_time
+		</elem>
+		<elem module='search' type='button' locate='查询' method='click'>
+		</elem>
+		<elem module='layer' type='msg' locate='' method='assert'>
+			查询无结果;_break
+		</elem>
+		<elem module='result' type='page.pages' locate='.' method='getinfo'>
+			_num
+		</elem>
+		<elem module='result' type='page.input' locate='.' method='input'>
+			info_list4;_randint
+		</elem>
+		<elem module='result' type='table' locate='' method='getinfo'>
+			_count
+		</elem>
+		<elem module='result' type='tables.car' locate='info_list5.号牌号码' method='assert'>
+			input_list1
+		</elem>
+		<elem module='result' type='tables.car' locate='info_list5.品牌型号' method='assert'>
+			info_list1
+		</elem>
+		<elem module='result' type='tables.car' locate='info_list5.颜色' method='assert'>
+			input_list6
+		</elem>
+		<elem module='result' type='tables.time' locate='info_list5.时间' method='assert'>
+			info_list2;info_list3;_t_range
+		</elem>
+		<elem module='result' type='tables.image' locate='info_list5.' method='assert'>
+			../img/loading-img.jpg;src;_attribute;_not
+		</elem>
+		<elem module='result' type='turn' locate='' method='click'>
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.taskId' method='assert'>
+			input_list2
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.cameraId' method='assert'>
+			默认相机
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.carPlateNumber' method='assert'>
+			input_list1
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.carPlateTypeName' method='assert'>
+			input_list4
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.typeName' method='assert'>
+			input_list3
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.carColorCodeName' method='assert'>
+			input_list6
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.carStyleCodeName' method='assert'>
+			info_list1
+		</elem>
+		<elem module='result' type='tr.td' locate='info_list5.snapshotTime' method='assert'>
+			info_list2;info_list3;_t_range
+		</elem>
+		<elem module='result' type='back' locate='' method='click'>
+		</elem>
+	</step>
+
+	<!-- 用例随机数量 -->
+	<complexity>0</complexity>
+
+	<!-- 用例执行顺序 -->
+	<priority>c</priority>
+</root>

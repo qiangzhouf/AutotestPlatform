@@ -1,0 +1,5 @@
+body          {padding:70px;}
+td            {align:center;valign:middle;min-width:80px;}
+h3            {color:#205081;font-family:SimSun;font-weight:bold}
+
+div.login     {background:#000;text-align:center;width:200px;height:200px}

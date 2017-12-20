@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row" style="height:100px;"></div>
+<div class="row">
+	<div class="col-md-4"></div>
+  <div class="col-md-5">
+    <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8" style="background:#FFF;border-radius:5px; border-style:solid; border-width:1px; border-color:#CCC">
+      <div class="row" style="height:5px;"></div>
+      <h3>登录</h3>
+		{% with messages = get_flashed_messages(with_categories=true) %}
+		{% for category, message in messages %}
+		<div class="alert alert-{{category}}">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+		  {% if category == 'danger' %}
+			<strong>错误：</strong> {{message}}
+		  {% elif category == 'warning' %}
+			<strong>警告：</strong> {{message}}
+		  {% elif category == 'info' %}
+			<strong>提示：</strong> {{message}}
+		  {% elif category == 'success' %}
+			<strong>成功：</strong> {{message}}
+		  {% else %}
+			<strong>信息：</strong> {{message}}
+		  {% endif %}
+		</div>
+		{% endfor %}
+		{% endwith %}
+      <hr>
+      <form class="form-horizontal" action="{{ url_for('login') }}" method=post>
+        <div class="form-group">
+          <label class="col-sm-3 control-label">用户名:</label>
+          <div class="col-sm-7">
+            <input type="text" class="form-control" placeholder="username" name=username>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-3 control-label">密码:</label>
+          <div class="col-sm-7">
+            <input type="password" class="form-control" placeholder="password" name=password>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <button type="submit" class="btn btn-primary">确定</button>
+          </div>
+        </div>
+      </form>
+      <div class="row" style="height:20px;"></div>
+    </div>
+    <div class="col-md-2"></div>
+    </div>
+  </div>
+  <div class="col-md-4"></div>
+</div>
+{% endblock %}
