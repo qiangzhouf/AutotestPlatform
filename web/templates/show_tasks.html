@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 {% if session.logged_in %}
+<script src="{{url_for('static', filename='show_task.js')}}"></script>
 <div class="row">
 	<div class="col-md-1"></div>
 	<div class="col-md-10"><h3>新建测试任务</h3></div>
@@ -81,74 +82,39 @@
   		<td><b>操作</b></td>
   	</tr>
     {% for ta in task %}
-  	  <form action="{{url_for('task_operate')}}" method="post">
-        <tr id={{ta[0]}}>
-      		<td>{{ta[0]}}</td>
-      		<td><input type="hidden" name="name" value={{ta[1]}}>{{ta[1]}}</input></td>
-      		<td>{{ta[2]}}</td>
-      		<td>{{ta[3]}}</td>
-      		<td>{{ta[4]}}</td>
-      		<td>{{ta[5]}}</td>
-      		<td>
+	<form action="{{url_for('task_operate')}}" method="post">
+		<tr id={{ta[0]}}>
+			<td>{{ta[0]}}</td>
+			<td><input type="hidden" name="name" value={{ta[1]}}> {{ta[1]}} </input></td>
+			<td>{{ta[2]}}</td>
+			<td>{{ta[3]}}</td>
+			<td>{{ta[4]}}</td>
+			<td>{{ta[5]}}</td>
+			<td>
 				<div class="progress progress-striped active">
 					<div class="progress-bar" style="width: {{ta[6]}};">{{ta[6]}}</div>
 				</div>
 			</td>
-      		<td>{{ta[7]}}</td>
-      		<td>{{ta[8]}}</td>
-      		<td>{{ta[9]}}</td>
-      		<td>
-    			{% if ta[5] == '未执行' or ta[5] == '已停止' %}
-    			<input id="status-{{ta[0]}}" class="btn btn-success" type=submit name=key value="启动"/>
+			<td>{{ta[7]}}</td>
+			<td>{{ta[8]}}</td>
+			<td>{{ta[9]}}</td>
+			<td>
+				{% if ta[5] == '未执行' or ta[5] == '已停止' %}
+				<input id="status-{{ta[0]}}" class="btn btn-success" type=submit name=key value="启动"/>
 				{% elif ta[5] == '已完成'%}
 				<input class="btn btn-success" type=submit name=key value="已完成" disabled="disabled"/>
 				{% else %}
-    			<input class="btn btn-danger" type=submit name=key value="停止"/>
-    			{% endif %}
+				<input class="btn btn-danger" type=submit name=key value="停止"/>
+				{% endif %}
 				<input class="btn btn-danger" type=submit name=key value="删除"/>
-          		<input class="btn btn-primary" type=submit name=key value="详情"/>
-    		  </td>
-  	    </tr>
-	    </form>
+				<input class="btn btn-primary" type=submit name=key value="详情"/>
+			  </td>
+		</tr>
+	</form>
     {% else %}
     <tr><td colspan="11">暂无任务</td></tr>
     {% endfor %}
   </table>
   </div>
 </div>
-
-<script>
-var websocket_url = 'http://' + document.domain + ':' + location.port + '/task_refresh';
-var socket = io.connect(websocket_url);
-//发送消息
-socket.emit('request_for_response',{'taskid':'all'});
-//监听回复的消息
-socket.on('response',function(data){
-    if (data.code == '200'){
-		var s_msg = data.msg.replace(/\[/g,"").replace(/\]/g,"").replace(/\)/g,"").replace(/\ /g,"").replace("\(","");
-		var array_msg = s_msg.split('(');
-		for (var j=0;j<array_msg.length;j++){
-			var array_task = array_msg[j].split(',');
-			var tr = document.getElementById(array_task[0]);
-			var inp = document.getElementById('status-'+array_task[0]);
-			var tds = tr.getElementsByTagName("td");
-			tds[5].innerHTML = array_task[5].replace(/\'/g,"");
-			if (array_task[5] == '\'已完成\''){
-				inp.setAttribute("disabled", "disabled");
-				inp.setAttribute("value", "已完成");}
-			var div = tds[6].getElementsByTagName("div");
-			div[1].style = "width:" + array_task[6].replace(/\'/g,"");
-			div[1].innerHTML = array_task[6].replace(/\'/g,"");;
-			tds[8].innerHTML = array_task[8].replace(/\'/g,"");;
-			tds[9].innerHTML = array_task[9].replace(/\'/g,"");
-		}
-		//收到消息确认，继续监听
-		socket.emit('request_for_response',{'taskid':'all'});
-    }
-    else{
-        alert('ERROR: ' + 'push server failed');
-    }
-});
-
-</script>
 {% endblock %}
