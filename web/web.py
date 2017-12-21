@@ -10,7 +10,7 @@ import subprocess
 from flask_socketio import SocketIO, emit
 import json
 import xml.etree.ElementTree as ET
-import uuid
+from threading import Lock
 
 
 # 配置
@@ -18,8 +18,10 @@ DATABASE = 'web.db'
 SECRET_KEY = 'zhouqiang'
 USERNAME = 'admin'
 PASSWORD = 'intedio'
-
-
+# 推送线程和锁和队列
+thread = None
+thread_lock = Lock()
+push_list = []
 # 自动化任务
 handle = {}
 
@@ -157,33 +159,36 @@ def write_xml(xml_file, data, flag=1):
     tree.write(file_name)
 
 
-# 消息推送
-@socketio.on('request_for_response', namespace='/task_refresh')
-def task_push(data):
-    value = data.get('taskid')
-    if value == 'all':
-        o_key =  str(uuid.uuid1())
-        global handle
-        handle[o_key] = 'open'
-        while True:
-            print(time.localtime())
-            s = connect_db()
-            msg = str(s.execute('select * from tasks order by id desc').fetchall())
-            s.close()
-            if msg == '[]' or handle[o_key] == 'close':
-                return
-            emit('response', {'code': 200, 'msg': msg, 'uuid': o_key}, namespace='/task_refresh')
-            time.sleep(3)
+@socketio.on('connect', namespace='/task_refresh')
+def ws_connect():
+    global push_list, thread
+    push_list.append(1)
+    print('Client connected', push_list, thread)
+    with thread_lock:
+        if thread == None:
+            thread = socketio.start_background_task(target=push)
 
 
-# 关闭推送
-@socketio.on('request_close', namespace='/task_refresh')
-def task_push_close(data):
-    value = data.get('close')
-    o_key = data.get('uuid')
-    if value == 'close':
-        global handle
-        handle[o_key] = 'close'
+@socketio.on('disconnect', namespace='/task_refresh')
+def ws_disconnect():
+    global push_list
+    push_list.pop()
+    print('Client disconnected', push_list, thread)
+
+
+def push():
+    global push_list, thread
+    while True:
+        print('push...', push_list)
+        s = connect_db()
+        msg = str(s.execute('select * from tasks order by id desc').fetchall())
+        s.close()
+        socketio.emit('rec_push', {'code': 200, 'msg': msg}, namespace='/task_refresh')
+        socketio.sleep(3)
+        if len(push_list) == 0:
+            thread = None
+            return
+
 
 
 @app.before_request

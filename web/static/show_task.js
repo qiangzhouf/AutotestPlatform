@@ -2,12 +2,9 @@ $(document).ready(function(){
     //建立websocket链接
     var websocket_url = 'http://' + document.domain + ':' + location.port + '/task_refresh';
     var socket = io.connect(websocket_url);
-    var uuid = ''
-    //发送消息
-    socket.emit('request_for_response',{'taskid':'all'});
-    //监听回复的消息
-    socket.on('response',function(data){
-        uuid = data.uuid
+
+    //监听推送消息
+    socket.on('rec_push',function(data){
         if (data.code == '200'){
             var s_msg = data.msg.replace(/\[/g,"").replace(/\]/g,"").replace(/\)/g,"").replace(/\ /g,"").replace("\(","");
             var array_msg = s_msg.split('(');
@@ -31,8 +28,9 @@ $(document).ready(function(){
             alert('ERROR: ' + 'push server failed');
         }
     });
+
     //页面关闭时执行，关闭链接
     $(window).on('unload',function(){
-        socket.emit('request_close',{'close':'close', 'uuid': uuid});
+        socket.emit('disconnect');
     });
 });
