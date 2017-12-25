@@ -17,7 +17,6 @@ def mtd(models, task_name):
     global input_list
     if models is not None:
         models = ['login', '1', 'menu', '1'] + models
-        print(models)
         s = sqlite3.connect('web/web.db')
         total_num = s.execute('select total_num from tasks where name=(?);', [task_name]).fetchall()[0][0] + 2
         seq = 0
@@ -42,21 +41,13 @@ def mtd(models, task_name):
                           [str(round(10/total_num*seq, 2)) + '%', task_name])
                 s.commit()
                 s.close()
-    else:
-        models = [name for name in os.listdir('model')]
-        for model in models:
-            html, step, comp, info, prop = get_xml(model)
-            for i in range(int(comp)):
-                input_list = []
-                filename, case_name = comp_file(i, info, prop, task_name)
-                for elem in step.iter():
-                    step_iter(elem, html, filename, case_name, task_name)
 
     # 返回csv用例文件列表
     cases = [names for names in os.listdir('data/%s' % task_name)]
-    print(cases)
+    cases.sort()
     cases.remove('login_1.csv')
     cases.remove('menu_1.csv')
+    print(cases)
 
     # 更新执行进度（用例集动态生成完成！）
     s = sqlite3.connect('web/web.db')
@@ -217,7 +208,6 @@ def comp_file(i, info, prop, task_name):
 
     if 'login' not in case_name and 'menu' not in case_name:
         s = sqlite3.connect('web/web.db')
-        print(task_name)
         s.execute('insert into "%s" (case_name,case_page,flag,type) values("%s","%s","%s","%s");' % (task_name, case_name, case_page, 0, 0))
         s.commit()
         s.close()

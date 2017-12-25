@@ -222,8 +222,6 @@ class Case:
         login_data = login_list[3:]
         self.driver.get(url)
         time.sleep(1)
-        self.driver.maximize_window()
-        time.sleep(1)
         tmp_name = self.name
         self.name = 'login'
         self._step(login_data)

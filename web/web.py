@@ -1,4 +1,5 @@
 import sqlite3
+import socket
 import time
 import os
 import platform
@@ -361,80 +362,74 @@ def case_set_operate():
 # 自动化任务操作
 @app.route('/task_operate', methods=['POST'])
 def task_operate():
-    if not session.get('logged_in'):
-        abort(401)
-    global handle
-    task_name = str(request.form['name'])
+	if not session.get('logged_in'):
+		abort(401)
+	global handle
+	task_name = str(request.form['name'])
+	if request.form['key'] == '启动':
+		try:
+			g.db.execute('drop table if exists "%s";' % task_name)
+			g.db.commit()
+			shutil.rmtree('../log/%s' % task_name)
+			shutil.rmtree('../data/%s' % task_name)
+		except:
+			pass
 
-    if request.form['key'] == '启动':
-        try:
-            g.db.execute('drop table if exists "%s";' % task_name)
-            g.db.commit()
-            shutil.rmtree('../log/%s' % task_name)
-            shutil.rmtree('../data/%s' % task_name)
-        except:
-            pass
-
-        os.makedirs('../log/%s/error/image/' % task_name)
-        os.makedirs('../data/%s/' % task_name)
-
-        if 'Windows' in platform.platform():
-            cmd = 'python ../start.py %s' % task_name
-        else:
-            cmd = 'python3 ../start.py %s' % task_name
-        g.db.execute('update tasks set status="运行中",operate_time=(?),pass_num=0,pass_rate="0%" where name=(?)',
+		os.makedirs('../log/%s/error/image/' % task_name)
+		os.makedirs('../data/%s/' % task_name)
+		g.db.execute('update tasks set status="运行中",operate_time=(?),pass_num=0,pass_rate="0%" where name=(?)',
                      [time.strftime('%y%m%d %H:%M', time.localtime()), task_name])
-        g.db.execute('create table "%s" (id integer primary key autoincrement,case_name string not null,\
+		g.db.execute('create table "%s" (id integer primary key autoincrement,case_name string not null,\
                     case_page string,flag string,step_num string,type string,ordd string,\
                     xpath string, operate string,data string,step_flag string,img string);' % task_name)
-        g.db.commit()
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        handle[task_name] = proc.pid
-        print(handle[task_name])
+		g.db.commit()
+		#proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+		s = socket.socket()
+		s.connect(('127.0.0.1',1111))
+		s.send(('task_name:%s' % task_name).encode('utf-8'))
+		handle[task_name] = s
+		print(handle[task_name])
 
-    elif request.form['key'] == '删除':
-        if g.db.execute('select status from tasks where'
+	elif request.form['key'] == '删除':
+		if g.db.execute('select status from tasks where'
                         ' name=(?)', [task_name]).fetchall()[0][0] not in ('已停止', '未执行', '已完成'):
-            flash('请先停止任务后再执行删除操作', 'danger')
-            return redirect(url_for('show_tasks'))
-        else:
-            try:
-                g.db.execute('drop table if exists "%s";' % task_name)
-                g.db.execute('delete from tasks where name=(?)', [task_name])
-                g.db.commit()
-                shutil.rmtree('../log/%s' % task_name)
-                shutil.rmtree('../data/%s' % task_name)
-            except:
-                pass
+			flash('请先停止任务后再执行删除操作', 'danger')
+			return redirect(url_for('show_tasks'))
+		else:
+			try:
+				g.db.execute('drop table if exists "%s";' % task_name)
+				g.db.execute('delete from tasks where name=(?)', [task_name])
+				g.db.commit()
+				shutil.rmtree('../log/%s' % task_name)
+				shutil.rmtree('../data/%s' % task_name)
+			except:
+				pass
 
-    elif request.form['key'] == '详情':
-
-        if g.db.execute('select status from tasks where'
+	elif request.form['key'] == '详情':
+		if g.db.execute('select status from tasks where'
                         ' name=(?)', [task_name]).fetchall()[0][0] == '未执行':
-            flash('任务未启动，暂无详情信息', 'danger')
-            return redirect(url_for('show_tasks'))
-        if int(g.db.execute('select progress from tasks where name=(?)',
+			flash('任务未启动，暂无详情信息', 'danger')
+			return redirect(url_for('show_tasks'))
+		if int(g.db.execute('select progress from tasks where name=(?)',
                             [task_name]).fetchall()[0][0].split('%')[0].split('.')[0]) < 10:
-            flash('用例动态生成中...，暂无法查看详情', 'warning')
-            return redirect(url_for('show_tasks'))
-        case_detail = g.db.execute('select * from "%s" where type="0" order by id' % task_name).fetchall()
-        step_detail = {}
-        for elem in case_detail:
-            tmp = g.db.execute('select * from "%s" where type="1" and case_name="%s" order by ordd'
+			flash('用例动态生成中...，暂无法查看详情', 'warning')
+			return redirect(url_for('show_tasks'))
+		case_detail = g.db.execute('select * from "%s" where type="0" order by id' % task_name).fetchall()
+		step_detail = {}
+		for elem in case_detail:
+			tmp = g.db.execute('select * from "%s" where type="1" and case_name="%s" order by ordd'
                                % (task_name, elem[1])).fetchall()
-            step_detail[elem[1]] = tmp
+			step_detail[elem[1]] = tmp
 
-        return render_template('task_detail.html', cases=case_detail, steps=step_detail)
+		return render_template('task_detail.html', cases=case_detail, steps=step_detail)
 
-    else:
-        if 'Windows' in platform.platform():
-            print(handle[task_name])
-            os.system('taskkill /F /PID %d' % handle[task_name])
-        else:
-            os.kill(handle[task_name], signal.SIGKILL)
-        g.db.execute('update tasks set status="已停止" where name=(?)', [task_name])
-        g.db.commit()
-    return redirect(url_for('show_tasks'))
+	elif request.form['key'] == '停止':
+		handle[task_name].send(b'exit')
+		handle[task_name].close()
+		del handle[task_name]
+		g.db.execute('update tasks set status="已停止" where name=(?)', [task_name])
+		g.db.commit()
+	return redirect(url_for('show_tasks'))
 
 
 # 页面抽象编写
@@ -492,6 +487,12 @@ def xml_add():
 
 
 # 模板编写
+    return jsonify(code=code, msg=msg)
+
+
+# 模板编写
+
+# 模板编写
 @app.route('/model', methods=['POST', 'GET'])
 def model():
     if not session.get('logged_in'):
@@ -536,11 +537,5 @@ def bug_img():
     print(img_path)
     with open(img_path, 'rb') as f:
         image = f.readlines()
-    print(image)
-    resp = Response(image, mimetype="image/jpeg")
+    resp = Response(image, mimetype="image/png")
     return resp
-
-
-if __name__ == '__main__':
-    init_db()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
