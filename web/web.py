@@ -12,6 +12,9 @@ from flask_socketio import SocketIO, emit
 import json
 import xml.etree.ElementTree as ET
 from threading import Lock
+import requests
+from requests.auth import HTTPBasicAuth
+from requests.auth import HTTPDigestAuth
 
 
 # 配置
@@ -208,6 +211,8 @@ def teardown_request(exception):
 # 首页---展示所有任务
 @app.route('/')
 def show_tasks():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     tasks = g.db.execute('select * from tasks order by id desc').fetchall()
     case_sets = g.db.execute('select name from case_set order by id desc').fetchall()
     return render_template('show_tasks.html', task=tasks, case_set=case_sets)
@@ -239,7 +244,7 @@ def logout():
 @app.route('/add', methods=['POST'])
 def add_tasks():
     if not session.get('logged_in'):
-        abort(401)
+        return redirect(url_for('login'))
     if request.form['select_set'] == 'none' or request.form['name'] == '':
         flash('任务名或用例集不能为空', 'danger')
         return redirect(url_for('show_tasks'))
@@ -264,6 +269,8 @@ def add_tasks():
 # 用例集展示页面
 @app.route('/case_set')
 def case_set():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     try:
         g.db.execute('create table model_case (id integer\
                      primary key autoincrement,name string not null);')
@@ -287,7 +294,7 @@ def case_set():
 @app.route('/add_case', methods=['POST', 'GET'])
 def add_case():
     if not session.get('logged_in'):
-        abort(401)
+        return redirect(url_for('login'))
     if request.method == 'POST':
         g.db.execute('insert into tmp_case (name, case_num) values (?, ?)',
                      [request.form['name'], (request.form['case_num'])])
@@ -299,7 +306,7 @@ def add_case():
 @app.route('/del_case', methods=['POST'])
 def del_case():
     if not session.get('logged_in'):
-        abort(401)
+        return redirect(url_for('login'))
     g.db.execute('delete from tmp_case where name=(?)', [request.form['name']])
     g.db.commit()
     flash('移除成功', 'success')
@@ -309,7 +316,7 @@ def del_case():
 @app.route('/add_set', methods=['POST'])
 def add_set():
     if not session.get('logged_in'):
-        abort(401)
+        return redirect(url_for('login'))
     if request.form['cname'] == '':
         flash('用例集名称不能为空', 'danger')
         return redirect(url_for('case_set'))
@@ -345,7 +352,7 @@ def add_set():
 @app.route('/case_set_operate', methods=['POST'])
 def case_set_operate():
     if not session.get('logged_in'):
-        abort(401)
+        return redirect(url_for('login'))
     if request.form['key'] == '删除':
         if (request.form['name'],) in g.db.execute('select case_set from tasks').fetchall():
             flash('当前已有任务使用该用例集，请先删除任务', 'danger')
@@ -362,74 +369,74 @@ def case_set_operate():
 # 自动化任务操作
 @app.route('/task_operate', methods=['POST'])
 def task_operate():
-	if not session.get('logged_in'):
-		abort(401)
-	global handle
-	task_name = str(request.form['name'])
-	if request.form['key'] == '启动':
-		try:
-			g.db.execute('drop table if exists "%s";' % task_name)
-			g.db.commit()
-			shutil.rmtree('../log/%s' % task_name)
-			shutil.rmtree('../data/%s' % task_name)
-		except:
-			pass
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    global handle
+    task_name = str(request.form['name'])
+    if request.form['key'] == '启动':
+        try:
+            g.db.execute('drop table if exists "%s";' % task_name)
+            g.db.commit()
+            shutil.rmtree('../log/%s' % task_name)
+            shutil.rmtree('../data/%s' % task_name)
+        except:
+            pass
 
-		os.makedirs('../log/%s/error/image/' % task_name)
-		os.makedirs('../data/%s/' % task_name)
-		g.db.execute('update tasks set status="运行中",operate_time=(?),pass_num=0,pass_rate="0%" where name=(?)',
+        os.makedirs('../log/%s/error/image/' % task_name)
+        os.makedirs('../data/%s/' % task_name)
+        g.db.execute('update tasks set status="运行中",operate_time=(?),pass_num=0,pass_rate="0%" where name=(?)',
                      [time.strftime('%y%m%d %H:%M', time.localtime()), task_name])
-		g.db.execute('create table "%s" (id integer primary key autoincrement,case_name string not null,\
+        g.db.execute('create table "%s" (id integer primary key autoincrement,case_name string not null,\
                     case_page string,flag string,step_num string,type string,ordd string,\
                     xpath string, operate string,data string,step_flag string,img string);' % task_name)
-		g.db.commit()
-		#proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-		s = socket.socket()
-		s.connect(('127.0.0.1',1111))
-		s.send(('task_name:%s' % task_name).encode('utf-8'))
-		handle[task_name] = s
-		print(handle[task_name])
+        g.db.commit()
+        #proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        s = socket.socket()
+        s.connect(('127.0.0.1',1111))
+        s.send(('task_name:%s' % task_name).encode('utf-8'))
+        handle[task_name] = s
+        print(handle[task_name])
 
-	elif request.form['key'] == '删除':
-		if g.db.execute('select status from tasks where'
+    elif request.form['key'] == '删除':
+        if g.db.execute('select status from tasks where'
                         ' name=(?)', [task_name]).fetchall()[0][0] not in ('已停止', '未执行', '已完成'):
-			flash('请先停止任务后再执行删除操作', 'danger')
-			return redirect(url_for('show_tasks'))
-		else:
-			try:
-				g.db.execute('drop table if exists "%s";' % task_name)
-				g.db.execute('delete from tasks where name=(?)', [task_name])
-				g.db.commit()
-				shutil.rmtree('../log/%s' % task_name)
-				shutil.rmtree('../data/%s' % task_name)
-			except:
-				pass
+            flash('请先停止任务后再执行删除操作', 'danger')
+            return redirect(url_for('show_tasks'))
+        else:
+            try:
+                g.db.execute('drop table if exists "%s";' % task_name)
+                g.db.execute('delete from tasks where name=(?)', [task_name])
+                g.db.commit()
+                shutil.rmtree('../log/%s' % task_name)
+                shutil.rmtree('../data/%s' % task_name)
+            except:
+                pass
 
-	elif request.form['key'] == '详情':
-		if g.db.execute('select status from tasks where'
+    elif request.form['key'] == '详情':
+        if g.db.execute('select status from tasks where'
                         ' name=(?)', [task_name]).fetchall()[0][0] == '未执行':
-			flash('任务未启动，暂无详情信息', 'danger')
-			return redirect(url_for('show_tasks'))
-		if int(g.db.execute('select progress from tasks where name=(?)',
+            flash('任务未启动，暂无详情信息', 'danger')
+            return redirect(url_for('show_tasks'))
+        if int(g.db.execute('select progress from tasks where name=(?)',
                             [task_name]).fetchall()[0][0].split('%')[0].split('.')[0]) < 10:
-			flash('用例动态生成中...，暂无法查看详情', 'warning')
-			return redirect(url_for('show_tasks'))
-		case_detail = g.db.execute('select * from "%s" where type="0" order by id' % task_name).fetchall()
-		step_detail = {}
-		for elem in case_detail:
-			tmp = g.db.execute('select * from "%s" where type="1" and case_name="%s" order by ordd'
+            flash('用例动态生成中...，暂无法查看详情', 'warning')
+            return redirect(url_for('show_tasks'))
+        case_detail = g.db.execute('select * from "%s" where type="0" order by id' % task_name).fetchall()
+        step_detail = {}
+        for elem in case_detail:
+            tmp = g.db.execute('select * from "%s" where type="1" and case_name="%s" order by ordd'
                                % (task_name, elem[1])).fetchall()
-			step_detail[elem[1]] = tmp
+            step_detail[elem[1]] = tmp
 
-		return render_template('task_detail.html', cases=case_detail, steps=step_detail)
+        return render_template('task_detail.html', cases=case_detail, steps=step_detail)
 
-	elif request.form['key'] == '停止':
-		handle[task_name].send(b'exit')
-		handle[task_name].close()
-		del handle[task_name]
-		g.db.execute('update tasks set status="已停止" where name=(?)', [task_name])
-		g.db.commit()
-	return redirect(url_for('show_tasks'))
+    elif request.form['key'] == '停止':
+        handle[task_name].send(b'exit')
+        handle[task_name].close()
+        del handle[task_name]
+        g.db.execute('update tasks set status="已停止" where name=(?)', [task_name])
+        g.db.commit()
+    return redirect(url_for('show_tasks'))
 
 
 # 页面抽象编写
@@ -487,12 +494,6 @@ def xml_add():
 
 
 # 模板编写
-    return jsonify(code=code, msg=msg)
-
-
-# 模板编写
-
-# 模板编写
 @app.route('/model', methods=['POST', 'GET'])
 def model():
     if not session.get('logged_in'):
@@ -533,9 +534,77 @@ def get_xml():
 
 @app.route('/bug_img')
 def bug_img():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     img_path = request.args.get('p')
     print(img_path)
     with open(img_path, 'rb') as f:
         image = f.readlines()
     resp = Response(image, mimetype="image/png")
     return resp
+
+@app.route('/api_record')
+def api_record():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('api_record.html')
+
+
+@app.route('/api_test', methods=['POST'])
+def api_test():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    req_host = request.form['host']
+    req_url = 'http://' + req_host + request.form['url']
+    req_method = request.form['method']
+    if request.form['data'] == '""':
+        req_data = {}
+    else:
+        req_data = json.loads(request.form['data'])
+    req_auth = request.form['auth']
+    if request.form['headers'] == '""':
+        req_headers = {}
+    else:
+        req_headers = json.loads(request.form['headers'])
+    if req_method == 'GET':
+        if req_auth == '"none"':
+            t = time.time()
+            print(req_url, req_data, req_headers)
+            req = requests.get(req_url, params=req_data, headers=req_headers)
+            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        else:
+            req_auth = json.loads(req_auth)
+            if req_auth['auth_method'] == 'Basic':
+                t = time.time()
+                req = requests.get(req_url, params=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            elif req_auth['auth_method'] == 'Digst':
+                t = time.time()
+                req = requests.get(req_url,params=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+    elif req_method == 'POST':
+        if req_auth == '"none"':
+            t = time.time()
+            req = requests.post(req_url, json=req_data, headers=req_headers)
+            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        else:
+            req_auth = json.loads(req_auth)
+            if req_auth['auth_method'] == 'Basic':
+                t = time.time()
+                req = requests.post(req_url, json=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            elif req_auth['auth_method'] == 'Digst':
+                t = time.time()
+                req = requests.post(req_url, json=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+    res_headers = dict(req.headers)
+    res_status_code = req.status_code
+    try:
+        res_data = req.json()
+    except:
+        res_data = str(req.text)
+    res_time = delt_t
+    return jsonify({'status_code': res_status_code, 'request_time': res_time, 'response': res_data, 'res_h': res_headers})
+            
+    
