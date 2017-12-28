@@ -1,0 +1,163 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{url_for('static', filename='api_record.js')}}"></script>
+
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-10"><h3>接口录入</h3></div>
+</div>
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-xs-10 col-sm-6 col-md-8" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:20px;"></div>
+    <div class="row">
+      <div class="col-md-5">
+         <div class="input-group">
+          <div class="input-group-btn">
+            <button type="button" class="btn btn-default">项目 </button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li class="pro"><a>视图库</a></li>
+              <li class="pro"><a>车综</a></li>
+            </ul>
+          </div>
+          <input id="project" type="text" class="form-control" aria-label="...">
+        </div>
+      </div>
+      <div class="col-md-3">
+         <div class="input-group">
+          <div class="input-group-btn">
+              <button type="button" class="btn btn-default">Ip</button>
+          </div>
+          <input id="ip" type="text" class="form-control" aria-label="...">
+         </div>
+       </div>
+       <div class="col-md-2">
+         <div class="input-group">
+          <div class="input-group-btn">
+              <button type="button" class="btn btn-default">Port</button>
+          </div>
+          <input id="port" type="text" class="form-control" aria-label="...">
+         </div>
+       </div>
+    </div>
+    <div class="row" style="height:10px;"></div>
+    <div class="row">
+      <div class="col-md-10 col-xs-8">
+        <div class="input-group">
+          <div class="input-group-btn">
+            <button id="method" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">方法 <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li class="method"><a>GET</a></li>
+              <li class="method"><a>POST</a></li>
+            </ul>
+          </div>
+          <input id="url" type="text" class="form-control" aria-label="..." placeholder="url">
+         <div class="input-group-btn">
+         <button type="button" class="btn btn-default" data-toggle="collapse" data-target="#params">参数</button>
+         </div>
+        </div>
+      </div>
+      <button id="send" type="button" class="btn btn-success">发送</button>
+      <button id="save" type="button" class="btn btn-default">保存</button>
+      <button id="send_alert" class="btn btn-lg" data-toggle="modal" data-target="#myModal" style="display:none"></button>
+    </div>
+    <div class="row" style="height:10px;"></div>
+    <div class="row">
+      <div class="col-md-8 collapse" id="params">
+          <table class="table table-condensed table-bordered" id="data">
+              <tr class="active">
+                  <td style="width:30%">键（Key）</td>
+                  <td style="width:30%">值（Value）</td>
+                  <td style="width:30%">描述（Description）</td>
+                  <td style="width:10%" align="center"><button class="btn btn-default" id="add" style="padding:0px 8px"><font size="4">+</font></button></td>
+              </tr>
+          </table>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-12">  
+        <ul id="myTab" class="nav nav-tabs">
+            <li class="active"><a href="#auth" data-toggle="tab">授权</a></li>
+            <li ><a href="#headers" data-toggle="tab">请求头部</a></li>
+        </ul>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade in active" id="auth">
+                <div class="row" style="height:5px;"></div>
+                <label class="radio-inline" style="margin:3px 0px">
+                    <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="None" checked> None
+                </label>
+                <label class="radio-inline" style="margin:3px 0px">
+                    <input type="radio" name="optionsRadiosinline" id="optionsRadios2"  value="Basic"> Basic auth
+                </label>
+                <label class="radio-inline" style="margin:3px 0px">
+                    <input type="radio" name="optionsRadiosinline" id="optionsRadios3"  value="Digst"> Digst auth
+                </label>
+                <div class="radio-inline" >
+                    <div name="authup" style="display: none;">
+                        <label class="radio-inline" >Username:<input id="auth_u"/></label>
+                        <label class="radio-inline" >Password:<input id="auth_p"/></label>
+                    </div>
+                </div>
+                <div class="row" style="height:20px;"></div>
+            </div>
+            <div class="tab-pane fade" id="headers">
+                <div class="row" style="height:5px;"></div>
+                 <div class="row">
+                  <div class="col-md-8"> 
+                       <table class="table table-condensed table-bordered" id="req_h">
+                          <tr class="active">
+                              <td style="width:30%">键（Key）</td>
+                              <td style="width:30%">值（Value）</td>
+                              <td style="width:30%">描述（Description）</td>
+                              <td style="width:10%" align="center"><button class="btn btn-default" id="add" style="padding:0px 8px"><font size="4">+</font></button></td>
+                          </tr>
+                      </table>
+                  </div>
+                </div>
+                <div class="row" style="height:5px;"></div>
+            </div>
+        </div>
+       </div>
+     </div>
+     <div class="row">
+      <div class="col-md-7">  
+        <ul id="myTab" class="nav nav-tabs">
+            <li class="active"><a href="#response" data-toggle="tab">响应消息体</a></li>
+            <li ><a href="#re_headers" data-toggle="tab">响应头部</a></li>
+        </ul>
+      </div>
+      <div class="col-md-2" style="margin:15px 0px 0px 0px">
+        状态码：<span id="status_code"></span>
+      </div>
+      <div class="col-md-2" style="margin:15px 0px 0px 0px">
+        请求时长：<span id="request_time"></span>
+      </div>   
+     </div>
+     <div class="row" style="height:10px;"></div>
+     <div class="row">
+         <div class="col-md-12">  
+             <div id="myTabContent" class="tab-content">
+               <div class="tab-pane fade in active" id="response">
+                   <textarea id="response" rows="24" name=textarea style="width:100%"></textarea>
+               </div>
+               <div class="tab-pane fade" id="re_headers">
+                    <div class="row">
+                  <div class="col-md-8"> 
+                  <table class="table table-condensed table-bordered" id="res_h">
+                  <tr class="active">
+                      <td style="width:30%">键(Key)</td>
+                      <td style="width:30%">值(Value)</td>
+                  </tr>
+                  </table></div></div>
+               </div>
+             </div>
+         </div>
+     </div>
+     <div class="row" style="height:10px;"></div>
+   </div>
+</div>
+    
+
+{% endblock%}
