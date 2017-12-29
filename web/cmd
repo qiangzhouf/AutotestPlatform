@@ -1,1 +1,0 @@
-uwsgi --http :3333 --gevent 1000 --http-websockets --master --wsgi-file web.py --callable app --disable-logging

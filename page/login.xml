@@ -1,11 +1,10 @@
-<?xml version="1.0"?>
 <root>
 	<url>new_viewer/view/login.html</url>
-	<frame/>
-	<html xpath='/html/body'>
-        <login xpath=''>
-            <input xpath='//input[@placeholder="@@"]'/>
-            <button xpath='//input[@value="@@"]'/>
+	<frame>''</frame>
+	<html xpath="/html/body">
+        <login xpath="">
+            <input xpath="//input[@placeholder=&quot;@@&quot;]" />
+            <button xpath="//input[@value=&quot;@@&quot;]" />
         </login>
 	</html>
 </root>

@@ -554,14 +554,19 @@ def api_record():
 def api_test():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    
+    pak = request.form['pak']
     req_host = request.form['host']
     req_url = 'http://' + req_host + request.form['url']
     req_method = request.form['method']
     if request.form['data'] == '""':
         req_data = {}
     else:
-        req_data = json.loads(request.form['data'])
+        if pak == 'Object':
+            req_data = {req_url.split('/')[-1]+'Object': json.loads(request.form['data'])}
+        elif pak == 'ObjectList':
+            req_data = {req_url.split('/')[-1]+'ObjectList': [{req_url.split('/')[-1]+'Object': elem} for elem in json.loads(request.form['data'])]}
+        else:
+            req_data = json.loads(request.form['data'])
     req_auth = request.form['auth']
     if request.form['headers'] == '""':
         req_headers = {}
@@ -606,5 +611,54 @@ def api_test():
         res_data = str(req.text)
     res_time = delt_t
     return jsonify({'status_code': res_status_code, 'request_time': res_time, 'response': res_data, 'res_h': res_headers})
-            
+
+
+@app.route('/project_api', methods=['POST'])
+def project_api():
+    if request.form['get'] == 'project':
+        project_list = g.db.execute('select * from project;').fetchall()
+        return jsonify(project=project_list)
+    elif request.form['get'] == 'api':
+        api_list = g.db.execute('select * from api where project_name="%s";' % request.form['project_name']).fetchall()
+        return jsonify(api=api_list)
+    elif request.form['get'] == 'single_api':
+        api = g.db.execute('select * from api where name="%s";' % request.form['api_name']).fetchall()[0]
+        return jsonify({'method':api[3], 'url':api[4], 'data':api[5], 'headers':api[6], 'auth':api[7], 'assert_data':api[8], 'host': api[9], 'pak': api[10]})
+
+
+@app.route('/api_save', methods=['POST'])
+def api_save():
+    pak = request.form['pak']
+    flag = request.form['flag']
+    req_host = request.form['host']
+    req_api_name = request.form['api_name']
+    req_project_name = request.form['project_name']
+    req_url = request.form['url']
+    req_method = request.form['method']
+    req_data = request.form['data'] 
+    req_auth = request.form['auth']
+    req_headers = request.form['headers']
+    req_assert_data = request.form['assert_data']
     
+    # 新增api
+    if flag == '1':
+        obj = g.db.execute("select * from api where name='%s' and project_name='%s';" % (req_api_name, req_project_name)).fetchall()
+        if len(obj):
+            return jsonify(code=500, msg='接口重名')
+        try:
+            g.db.execute("insert into api (name, project_name, method, url, data, headers, auth, assert, host, coloum) values('%s','%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s');" % (req_api_name, req_project_name, req_method, req_url, req_data, req_headers, req_auth, req_assert_data, req_host, pak))
+            g.db.commit()
+            return jsonify(code=200)
+        except Exception as msg:
+            return jsonify(code=500, msg=msg)
+    # 修改api
+    else:
+        obj = g.db.execute("select * from api where name='%s' and project_name='%s';" % (req_api_name, req_project_name)).fetchall()
+        if not len(obj):
+            return jsonify(code=500, msg='接口不存在，无法修改')
+        try:
+            g.db.execute("update api set method='%s', url='%s', data='%s', headers='%s', auth='%s', assert='%s', host='%s', coloum='%s'where name='%s' and project_name='%s';" % (req_method, req_url, req_data, req_headers, req_auth, req_assert_data, req_host, pak, req_api_name, req_project_name))
+            g.db.commit()
+            return jsonify(code=200)
+        except Exception as msg:
+            return jsonify(code=500, msg=msg)

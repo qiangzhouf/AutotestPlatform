@@ -4,7 +4,7 @@
 
 <div class="row">
 	<div class="col-md-1"></div>
-	<div class="col-md-10"><h3>接口录入</h3></div>
+	<div class="col-md-10"><h3>接口测试&录入</h3></div>
 </div>
 
 <div class="row">
@@ -12,19 +12,28 @@
   <div class="col-xs-10 col-sm-6 col-md-8" style="background:#FFF;border-radius:10px;">
     <div class="row" style="height:20px;"></div>
     <div class="row">
-      <div class="col-md-5">
+      <div class="col-md-4">
          <div class="input-group">
           <div class="input-group-btn">
             <button type="button" class="btn btn-default">项目 </button>
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
-            <ul class="dropdown-menu">
-              <li class="pro"><a>视图库</a></li>
-              <li class="pro"><a>车综</a></li>
+            <ul class="dropdown-menu" id=project_name>
             </ul>
           </div>
-          <input id="project" type="text" class="form-control" aria-label="...">
+          <input id="project" type="text" class="form-control" aria-label="..." readonly  unselectable="on">
         </div>
       </div>
+      <div class="col-md-3">
+         <div class="input-group">
+          <div class="input-group-btn">
+              <button type="button" class="btn btn-default">接口名</button>
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+            <ul class="dropdown-menu" id="api_name">
+            </ul>
+          </div>
+          <input id="api" type="text" class="form-control" aria-label="...">
+         </div>
+       </div>
       <div class="col-md-3">
          <div class="input-group">
           <div class="input-group-btn">
@@ -44,7 +53,7 @@
     </div>
     <div class="row" style="height:10px;"></div>
     <div class="row">
-      <div class="col-md-10 col-xs-8">
+      <div class="col-md-9 col-xs-8">
         <div class="input-group">
           <div class="input-group-btn">
             <button id="method" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">方法 <span class="caret"></span></button>
@@ -59,13 +68,25 @@
          </div>
         </div>
       </div>
+        <div class="col-md-3 col-xs-4">
       <button id="send" type="button" class="btn btn-success">发送</button>
-      <button id="save" type="button" class="btn btn-default">保存</button>
-      <button id="send_alert" class="btn btn-lg" data-toggle="modal" data-target="#myModal" style="display:none"></button>
+      <button id="save" type="button" class="btn btn-default">新增</button>
+        <button id="save" type="button" class="btn btn-default">修改</button>
+      <button id="send_alert" class="btn btn-lg" data-toggle="modal" data-target="#myModal" style="display:none"></button></div>
     </div>
     <div class="row" style="height:10px;"></div>
     <div class="row">
       <div class="col-md-8 collapse" id="params">
+             <label class="radio-inline" style="margin:3px 0px">
+                <input type="radio" name='pak' id="options1" value="None" checked> None
+            </label>
+            <label class="radio-inline" style="margin:3px 0px">
+                <input type="radio" name='pak' id="options2"  value="Object"> Object
+            </label>
+            <label class="radio-inline" style="margin:3px 0px">
+                <input type="radio" name='pak' id="options3"  value="ObjectList"> ObjectList
+            </label>
+          <div class="row" style="height:10px;"></div>
           <table class="table table-condensed table-bordered" id="data">
               <tr class="active">
                   <td style="width:30%">键（Key）</td>
@@ -80,19 +101,19 @@
       <div class="col-md-12">  
         <ul id="myTab" class="nav nav-tabs">
             <li class="active"><a href="#auth" data-toggle="tab">授权</a></li>
-            <li ><a href="#headers" data-toggle="tab">请求头部</a></li>
+            <li ><a href="#headers" data-toggle="tab">请求头部 </a></li>
         </ul>
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade in active" id="auth">
                 <div class="row" style="height:5px;"></div>
                 <label class="radio-inline" style="margin:3px 0px">
-                    <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="None" checked> None
+                    <input type="radio" name="auth" id="optionsRadios1" value="None" checked> None
                 </label>
                 <label class="radio-inline" style="margin:3px 0px">
-                    <input type="radio" name="optionsRadiosinline" id="optionsRadios2"  value="Basic"> Basic auth
+                    <input type="radio" name="auth" id="optionsRadios2"  value="Basic"> Basic auth
                 </label>
                 <label class="radio-inline" style="margin:3px 0px">
-                    <input type="radio" name="optionsRadiosinline" id="optionsRadios3"  value="Digst"> Digst auth
+                    <input type="radio" name="auth" id="optionsRadios3"  value="Digst"> Digst auth
                 </label>
                 <div class="radio-inline" >
                     <div name="authup" style="display: none;">
@@ -126,6 +147,7 @@
         <ul id="myTab" class="nav nav-tabs">
             <li class="active"><a href="#response" data-toggle="tab">响应消息体</a></li>
             <li ><a href="#re_headers" data-toggle="tab">响应头部</a></li>
+            <li ><a href="#assert" data-toggle="tab" id="er">自定义校验</a></li>
         </ul>
       </div>
       <div class="col-md-2" style="margin:15px 0px 0px 0px">
@@ -144,11 +166,23 @@
                </div>
                <div class="tab-pane fade" id="re_headers">
                     <div class="row">
-                  <div class="col-md-8"> 
+                  <div class="col-md-12"> 
                   <table class="table table-condensed table-bordered" id="res_h">
                   <tr class="active">
                       <td style="width:30%">键(Key)</td>
                       <td style="width:30%">值(Value)</td>
+                  </tr>
+                  </table></div></div>
+               </div>
+               <div class="tab-pane fade" id="assert">
+                    <div class="row">
+                  <div class="col-md-12"> 
+                  <table class="table table-condensed table-bordered" id="assert_tb">
+                  <tr class="active">
+                      <td style="width:25%">键(Key)</td>
+                      <td style="width:25%">值(Value)</td>
+                      <td style="width:25%">校验类型</td>
+                      <td style="width:25%">目标值</td>
                   </tr>
                   </table></div></div>
                </div>
