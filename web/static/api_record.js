@@ -113,13 +113,19 @@ $(function(){
             {
                 $('input#optionsRadios1').trigger("click");
             };
-            if (data.pak == 'ObjectList'){
+            var j_pak = JSON.parse(data.pak)
+            if (j_pak['type'] == 'ObjectList'){
                 $('input#options3').trigger("click");
+                $('input#pak_name').val(j_pak['object_name'])
             }
-            else if (data.pak == 'Object'){
+            else if (j_pak['type'] == 'Object'){
                 $('input#options2').trigger("click");
+                $('input#pak_name').val(j_pak['object_name'])
             }
-            else{$('input#options1').trigger("click");};
+            else{
+                $('input#options1').trigger("click");
+                $('input#pak_name').val('')
+                };
             var j_host = JSON.parse(data.host)
             if (j_host != '' && j_host != null){
                 $('input#ip').val(j_host['ip'])
@@ -155,6 +161,14 @@ $(function(){
             $('[name="authup"]').attr('style', "display: block;")
         }
         else{$('[name="authup"]').attr('style', "display: none;")};
+    });
+    
+    //对象参数，选择时，加一层包封
+    $("input:radio[name='pak']").click(function(){
+        if ($(this).val() != "None"){
+            $('[name="pak_name"]').attr('style', "display: block;")
+        }
+        else{$('[name="pak_name"]').attr('style', "display: none;")};
     });
     
     //头部参数添加，动态生成表格
@@ -298,10 +312,10 @@ $(function(){
             };
         };
         //外层包封
-        pak = $('input:radio[name="pak"]:checked').val()
+        pak = {'type': $('input:radio[name="pak"]:checked').val(), 'object_name': $('input#pak_name').val()}
             
         //ajax下发post数据
-        $.post('/api_test', {'pak':pak, 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers)}, function(data){
+        $.post('/api_test', {'pak': JSON.stringify(pak), 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers)}, function(data){
             $('span#status_code').text(data.status_code);
             $('span#request_time').text(data.request_time);
             $('textarea#response').text(JSON.stringify(data.response, null, 4))
@@ -446,10 +460,10 @@ $(function(){
             };
         };
         //外层包封
-        pak = $('input:radio[name="pak"]:checked').val()
+        pak = {'type': $('input:radio[name="pak"]:checked').val(), 'object_name': $('input#pak_name').val()}
         
         //ajax下发post数据
-        $.post('/api_save', {'pak': pak, 'flag': flag, 'host': JSON.stringify(host), 'api_name': api_name, 'project_name': project_name, 'url': url, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers), 'assert_data':  JSON.stringify(assert_data)}, function(data){
+        $.post('/api_save', {'pak': JSON.stringify(pak), 'flag': flag, 'host': JSON.stringify(host), 'api_name': api_name, 'project_name': project_name, 'url': url, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers), 'assert_data':  JSON.stringify(assert_data)}, function(data){
             if (data.code=200){
                 $("h4#myModalLabel").text("提示");
                 $("div.modal-body").text("保存成功！");

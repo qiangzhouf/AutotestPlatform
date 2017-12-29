@@ -4,7 +4,7 @@
 
 <div class="row">
 	<div class="col-md-1"></div>
-	<div class="col-md-10"><h3>接口测试&录入</h3></div>
+	<div class="col-md-10"><h3>接口测试 & 录入</h3></div>
 </div>
 
 <div class="row">
@@ -60,6 +60,8 @@
             <ul class="dropdown-menu">
               <li class="method"><a>GET</a></li>
               <li class="method"><a>POST</a></li>
+                <li class="method"><a>PUT</a></li>
+                <li class="method"><a>DELETE</a></li>
             </ul>
           </div>
           <input id="url" type="text" class="form-control" aria-label="..." placeholder="url">
@@ -77,6 +79,7 @@
     <div class="row" style="height:10px;"></div>
     <div class="row">
       <div class="col-md-8 collapse" id="params">
+          <div class="row" style="height:5px;"></div>
              <label class="radio-inline" style="margin:3px 0px">
                 <input type="radio" name='pak' id="options1" value="None" checked> None
             </label>
@@ -86,6 +89,11 @@
             <label class="radio-inline" style="margin:3px 0px">
                 <input type="radio" name='pak' id="options3"  value="ObjectList"> ObjectList
             </label>
+              <div class="radio-inline" >
+                    <div name="pak_name" style="display: none;">
+                        <label class="radio-inline" >对象名:<input id="pak_name"/></label>
+                    </div>
+                </div>
           <div class="row" style="height:10px;"></div>
           <table class="table table-condensed table-bordered" id="data">
               <tr class="active">
@@ -149,6 +157,9 @@
             <li ><a href="#re_headers" data-toggle="tab">响应头部</a></li>
             <li ><a href="#assert" data-toggle="tab" id="er">自定义校验</a></li>
         </ul>
+      </div>
+        <div class="col-md-1" style="margin:15px 0px 0px 0px">
+        <span id="status" style="border-radius: 90px;background-color:red"> </span>
       </div>
       <div class="col-md-2" style="margin:15px 0px 0px 0px">
         状态码：<span id="status_code"></span>

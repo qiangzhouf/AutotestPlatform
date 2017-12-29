@@ -554,7 +554,8 @@ def api_record():
 def api_test():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    pak = request.form['pak']
+    pak = json.loads(request.form['pak'])['type']
+    pak_name = json.loads(request.form['pak'])['object_name']
     req_host = request.form['host']
     req_url = 'http://' + req_host + request.form['url']
     req_method = request.form['method']
@@ -562,9 +563,9 @@ def api_test():
         req_data = {}
     else:
         if pak == 'Object':
-            req_data = {req_url.split('/')[-1]+'Object': json.loads(request.form['data'])}
+            req_data = {pak_name+'Object': json.loads(request.form['data'])}
         elif pak == 'ObjectList':
-            req_data = {req_url.split('/')[-1]+'ObjectList': [{req_url.split('/')[-1]+'Object': elem} for elem in json.loads(request.form['data'])]}
+            req_data = {pak_name+'ObjectList': [{pak_name+'Object': elem} for elem in json.loads(request.form['data'])]}
         else:
             req_data = json.loads(request.form['data'])
     req_auth = request.form['auth']
@@ -572,6 +573,7 @@ def api_test():
         req_headers = {}
     else:
         req_headers = json.loads(request.form['headers'])
+        
     if req_method == 'GET':
         if req_auth == '"none"':
             t = time.time()
@@ -603,6 +605,37 @@ def api_test():
                 t = time.time()
                 req = requests.post(req_url, json=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
                 delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+    elif req_method == 'PUT':
+        if req_auth == '"none"':
+            t = time.time()
+            req = requests.post(req_url, data=json.dumps(req_data), headers=req_headers)
+            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        else:
+            req_auth = json.loads(req_auth)
+            if req_auth['auth_method'] == 'Basic':
+                t = time.time()
+                req = requests.post(req_url, data=json.dumps(req_data), headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            elif req_auth['auth_method'] == 'Digst':
+                t = time.time()
+                req = requests.post(req_url, data=json.dumps(req_data), headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+    elif req_method == 'DELETE':
+        if req_auth == '"none"':
+            t = time.time()
+            req = requests.post(req_url, headers=req_headers)
+            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        else:
+            req_auth = json.loads(req_auth)
+            if req_auth['auth_method'] == 'Basic':
+                t = time.time()
+                req = requests.post(req_url, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            elif req_auth['auth_method'] == 'Digst':
+                t = time.time()
+                req = requests.post(req_url, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+    
     res_headers = dict(req.headers)
     res_status_code = req.status_code
     try:
