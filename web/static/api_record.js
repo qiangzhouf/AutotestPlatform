@@ -50,6 +50,13 @@ function parse_res(fa,res,f=''){
 }
 
 
+//返回参数个数
+function re_data_count(){
+    var count = $('table#data').find('tr').length - 1
+    $('span#count_data').text(count)
+}
+
+
 //入口
 $(function(){
     //刷新项目下拉和接口下拉
@@ -71,7 +78,10 @@ $(function(){
     $("ul.dropdown-menu").on('click', 'li.api', function(){
         //清除上一次响应数据
         $('tr.dam_res').remove()
-        $('textarea#response').text('')
+        $('textarea#response-text').text('')
+        $('textarea#request-text').text('')
+        $('textarea#response-json').text('')
+        $('textarea#request-json').text('')
         $('span#status_code').text('')
         $('span#request_time').text('')
         $('tr.assert').remove()
@@ -152,6 +162,7 @@ $(function(){
                     
                 };
             };
+        re_data_count()
         });
     });
     
@@ -171,15 +182,29 @@ $(function(){
         else{$('[name="pak_name"]').attr('style', "display: none;")};
     });
     
-    //头部参数添加，动态生成表格
+    //参数添加，动态生成表格
     $("button#add").click(function(){
         var insert_html = '<tr class="dam"><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
         $(this).parent().parent().parent().find("tr").last().after(insert_html)
+        if ($(this).parents('table').attr('id') == 'data'){re_data_count()}
     });
     
-    //头部参数删除，动态删除表格
+    //json参数添加，动态生成表格
+    $("button#add_json").click(function(){
+        var insert_html = '<tr class="dam"><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
+        $(this).parent().parent().parent().find("tr").last().after(insert_html)
+        if ($(this).parents('table').attr('id') == 'data'){re_data_count()}
+    });
+    
+    //参数删除，动态删除表格
     $('table').on('click', 'button#del', function(){
-        $(this).parent().parent().remove()
+        if ($(this).parents('table').attr('id') == 'data'){
+            $(this).parent().parent().remove()
+            re_data_count()
+        }
+        else{
+            $(this).parent().parent().remove()
+        }
     });
     
     //url自动规范成path, ip, port
@@ -228,11 +253,19 @@ $(function(){
         else if ($(this).val() == 'set'){obj_td.empty();obj_td.append('<input class="form-control"/>')}
     });
     
+    //删除校验值
+    $('button#del_assert').click(function(){
+        $('tr.assert').remove();
+    });
+    
     //下发http请求，返回响应
     $('button#send').click(function(){
         //清除上一次响应数据
         $('tr.dam_res').remove()
-        $('textarea#response').text('')
+        $('textarea#response-text').text('')
+        $('textarea#request-text').text('')
+        $('textarea#response-json').text('')
+        $('textarea#request-json').text('')
         $('span#status_code').text('')
         $('span#request_time').text('')
         $('a#er span').remove()
@@ -293,7 +326,13 @@ $(function(){
             datas = {}
             var elem = $('table#data').find('tr.dam')
             for (var i=0;i<elem.length;i++){
-                datas[elem.eq(i).find('td').eq(0).find('input').val()] = elem.eq(i).find('td').eq(1).find('input').val()
+                var s = elem.eq(i).find('td').eq(1).find('input').val()
+                if (s.match('json:')){
+                    datas[elem.eq(i).find('td').eq(0).find('input').val()] = JSON.parse(s.split('json:')[1]);
+                }
+                else{
+                    datas[elem.eq(i).find('td').eq(0).find('input').val()] = s;
+                }
             };
         };
         //授权数据
@@ -318,7 +357,10 @@ $(function(){
         $.post('/api_test', {'pak': JSON.stringify(pak), 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers)}, function(data){
             $('span#status_code').text(data.status_code);
             $('span#request_time').text(data.request_time);
-            $('textarea#response').text(JSON.stringify(data.response, null, 4))
+            $('textarea#response-json').text(JSON.stringify(data.response, null, 4))
+            $('textarea#request-json').text(JSON.stringify(data.request, null, 4))
+            $('textarea#response-text').text(JSON.stringify(data.response))
+            $('textarea#request-text').text(JSON.stringify(data.request))
             for(var key in data.res_h){
                 var new_html = '<tr class="dam_res"><td>' + key + '</td><td>' + data.res_h[key] + '</td><tr>';
                 $('table#res_h').find('tr').last().after(new_html);
@@ -434,9 +476,9 @@ $(function(){
             };
         };
         //授权数据
-        if ($('input:radio:checked').val() != 'None'){
+        if ($('input:radio[name="auth"]:checked').val() != 'None'){
             auth = {};
-            auth["auth_method"] = $('input:radio:checked').val();
+            auth["auth_method"] = $('input:radio[name="auth"]:checked').val();
             auth["username"] = $('input#auth_u').val();
             auth["password"] = $('input#auth_p').val();
         };

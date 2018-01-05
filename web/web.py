@@ -565,7 +565,10 @@ def api_test():
         if pak == 'Object':
             req_data = {pak_name+'Object': json.loads(request.form['data'])}
         elif pak == 'ObjectList':
-            req_data = {pak_name+'ObjectList': [{pak_name+'Object': elem} for elem in json.loads(request.form['data'])]}
+            if isinstance(json.loads(request.form['data']), list):
+                req_data = { pak_name+'ListObject': {pak_name+'Object': json.loads(request.form['data']) }}
+            else:
+                req_data = { pak_name+'ListObject': {pak_name+'Object': [json.loads(request.form['data']) ]}}
         else:
             req_data = json.loads(request.form['data'])
     req_auth = request.form['auth']
@@ -577,7 +580,6 @@ def api_test():
     if req_method == 'GET':
         if req_auth == '"none"':
             t = time.time()
-            print(req_url, req_data, req_headers)
             req = requests.get(req_url, params=req_data, headers=req_headers)
             delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
         else:
@@ -608,32 +610,32 @@ def api_test():
     elif req_method == 'PUT':
         if req_auth == '"none"':
             t = time.time()
-            req = requests.post(req_url, data=json.dumps(req_data), headers=req_headers)
+            req = requests.put(req_url, json=req_data, headers=req_headers)
             delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
         else:
             req_auth = json.loads(req_auth)
             if req_auth['auth_method'] == 'Basic':
                 t = time.time()
-                req = requests.post(req_url, data=json.dumps(req_data), headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                req = requests.put(req_url, json=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
                 delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
             elif req_auth['auth_method'] == 'Digst':
                 t = time.time()
-                req = requests.post(req_url, data=json.dumps(req_data), headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                req = requests.put(req_url, json=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
                 delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
     elif req_method == 'DELETE':
         if req_auth == '"none"':
             t = time.time()
-            req = requests.post(req_url, headers=req_headers)
+            req = requests.delete(req_url, headers=req_headers)
             delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
         else:
             req_auth = json.loads(req_auth)
             if req_auth['auth_method'] == 'Basic':
                 t = time.time()
-                req = requests.post(req_url, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                req = requests.delete(req_url, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
                 delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
             elif req_auth['auth_method'] == 'Digst':
                 t = time.time()
-                req = requests.post(req_url, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                req = requests.delete(req_url, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
                 delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
     
     res_headers = dict(req.headers)
@@ -643,7 +645,7 @@ def api_test():
     except:
         res_data = str(req.text)
     res_time = delt_t
-    return jsonify({'status_code': res_status_code, 'request_time': res_time, 'response': res_data, 'res_h': res_headers})
+    return jsonify({'status_code': res_status_code, 'request_time': res_time, 'response': res_data, 'res_h': res_headers, 'request': req_data})
 
 
 @app.route('/project_api', methods=['POST'])
@@ -652,7 +654,7 @@ def project_api():
         project_list = g.db.execute('select * from project;').fetchall()
         return jsonify(project=project_list)
     elif request.form['get'] == 'api':
-        api_list = g.db.execute('select * from api where project_name="%s";' % request.form['project_name']).fetchall()
+        api_list = g.db.execute('select * from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()
         return jsonify(api=api_list)
     elif request.form['get'] == 'single_api':
         api = g.db.execute('select * from api where name="%s";' % request.form['api_name']).fetchall()[0]

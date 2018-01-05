@@ -28,7 +28,7 @@
           <div class="input-group-btn">
               <button type="button" class="btn btn-default">接口名</button>
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
-            <ul class="dropdown-menu" id="api_name">
+            <ul class="dropdown-menu" id="api_name" style="height:500px;overflow:auto;">
             </ul>
           </div>
           <input id="api" type="text" class="form-control" aria-label="...">
@@ -78,7 +78,7 @@
     </div>
     <div class="row" style="height:10px;"></div>
     <div class="row">
-      <div class="col-md-8 collapse" id="params">
+      <div class="col-md-12 collapse" id="params">
           <div class="row" style="height:5px;"></div>
              <label class="radio-inline" style="margin:3px 0px">
                 <input type="radio" name='pak' id="options1" value="None" checked> None
@@ -87,7 +87,10 @@
                 <input type="radio" name='pak' id="options2"  value="Object"> Object
             </label>
             <label class="radio-inline" style="margin:3px 0px">
-                <input type="radio" name='pak' id="options3"  value="ObjectList"> ObjectList
+                <input type="radio" name='pak' id="options3"  value="ObjectList"> ListObject
+            </label>
+              <label class="radio-inline" style="margin:3px 0px">
+                 参数个数：<span id=count_data></span>
             </label>
               <div class="radio-inline" >
                     <div name="pak_name" style="display: none;">
@@ -95,15 +98,20 @@
                     </div>
                 </div>
           <div class="row" style="height:10px;"></div>
+          <div style="height:250px;overflow-y:auto;">
           <table class="table table-condensed table-bordered" id="data">
               <tr class="active">
-                  <td style="width:30%">键（Key）</td>
-                  <td style="width:30%">值（Value）</td>
-                  <td style="width:30%">描述（Description）</td>
-                  <td style="width:10%" align="center"><button class="btn btn-default" id="add" style="padding:0px 8px"><font size="4">+</font></button></td>
+                  <td style="width:18%">键（Key）</td>
+                  <td style="width:18%">值（Value）</td>
+                  <td style="width:18%">描述（Description）</td>
+                  <td style="width:18%">必要性（R/O）</td>
+                  <td style="width:18%">参数约束（Range）</td>
+                  <td style="width:10%" align="center"><button class="btn btn-default" id="add_json" style="padding:0px 8px"><font size="4">+</font></button>&nbsp;&nbsp;<button class="btn btn-default" id="del_alldata" style="padding:0px 8px"><font size="3">x</font></button></td>
               </tr>
           </table>
+              </div>
       </div>
+        <div class="row" style="height:10px;"></div>
    </div>
    <div class="row">
       <div class="col-md-12">  
@@ -154,6 +162,7 @@
       <div class="col-md-7">  
         <ul id="myTab" class="nav nav-tabs">
             <li class="active"><a href="#response" data-toggle="tab">响应消息体</a></li>
+            <li ><a href="#request" data-toggle="tab">请求消息体</a></li>
             <li ><a href="#re_headers" data-toggle="tab">响应头部</a></li>
             <li ><a href="#assert" data-toggle="tab" id="er">自定义校验</a></li>
         </ul>
@@ -173,7 +182,16 @@
          <div class="col-md-12">  
              <div id="myTabContent" class="tab-content">
                <div class="tab-pane fade in active" id="response">
-                   <textarea id="response" rows="24" name=textarea style="width:100%"></textarea>
+                   json:
+                   <textarea id="response-json" rows="16" name=textarea style="width:100%"></textarea>
+                   text:
+                   <textarea id="response-text" rows="8" name=textarea style="width:100%"></textarea>
+               </div>
+                 <div class="tab-pane fade" id="request">
+                     json:
+                     <textarea id="request-json" rows="16" name=textarea style="width:100%"></textarea>
+                     text:
+                   <textarea id="request-text" rows="8" name=textarea style="width:100%"></textarea>
                </div>
                <div class="tab-pane fade" id="re_headers">
                     <div class="row">
@@ -190,10 +208,11 @@
                   <div class="col-md-12"> 
                   <table class="table table-condensed table-bordered" id="assert_tb">
                   <tr class="active">
-                      <td style="width:25%">键(Key)</td>
+                      <td style="width:20%">键(Key)</td>
                       <td style="width:25%">值(Value)</td>
-                      <td style="width:25%">校验类型</td>
+                      <td style="width:20%">校验类型</td>
                       <td style="width:25%">目标值</td>
+                      <td style="width:10%" align="center"><button class="btn btn-default" id="del_assert" style="padding:0px 8px"><font size="4">x</font></button></td>
                   </tr>
                   </table></div></div>
                </div>
