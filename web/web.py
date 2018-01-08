@@ -564,7 +564,7 @@ def api_test():
     else:
         if pak == 'Object':
             req_data = {pak_name+'Object': json.loads(request.form['data'])}
-        elif pak == 'ObjectList':
+        elif pak == 'ListObject':
             if isinstance(json.loads(request.form['data']), list):
                 req_data = { pak_name+'ListObject': {pak_name+'Object': json.loads(request.form['data']) }}
             else:

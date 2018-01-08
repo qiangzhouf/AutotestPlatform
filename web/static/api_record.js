@@ -1,4 +1,4 @@
-//刷新项目和接口的下拉列表
+//项目、接口  下拉列表动态刷新
 function refresh_select()
 {
     if ($('input#project').val() == ''){
@@ -10,6 +10,8 @@ function refresh_select()
                 new_html = new_html + '<li class="pro"><a>' + data.project[i][1] + '</a></li>';
            };
             $('ul#project_name').append(new_html)
+            $('input#project').val(data.project[0][1])
+            refresh_select()
         });
     }
     else{
@@ -25,7 +27,7 @@ function refresh_select()
 }
 
       
-//返回参数格式化
+//json串逐层拆解
 function parse_res(fa,res,f=''){
     for (key in fa){
         if (typeof(fa[key])=='object'){
@@ -50,21 +52,21 @@ function parse_res(fa,res,f=''){
 }
 
 
-//返回参数个数
+//统计data参数表格中的参数个数
 function re_data_count(){
     var count = $('table#data').find('tr').length - 1
     $('span#count_data').text(count)
 }
 
 
-//入口
+//程序入口
 $(function(){
     //刷新项目下拉和接口下拉
     refresh_select()
         
     //请求方法GET,POST...选择
     $("ul.dropdown-menu li.method").click(function(){
-        $(this).parent().parent().find("button").text($(this).text())
+        $(this).parent().parent().find("button#method").text($(this).text())
     });
     
     //项目选择，方便接口归类管理
@@ -77,30 +79,47 @@ $(function(){
     //接口选择，接口查看编辑修改
     $("ul.dropdown-menu").on('click', 'li.api', function(){
         //清除上一次响应数据
+        //响应头部
         $('tr.dam_res').remove()
+        //响应消息题
         $('textarea#response-text').text('')
         $('textarea#request-text').text('')
         $('textarea#response-json').text('')
         $('textarea#request-json').text('')
+        //响应状态码、时间
         $('span#status_code').text('')
         $('span#request_time').text('')
+        //响应校验参数，气泡数
         $('tr.assert').remove()
         $('a#er span').remove()
+        //请求参数和请求头部
+        $('tr.dam').remove();
+        //list对象的多个表格
+        $('table#data').parent().nextAll('div.list').remove()
         
+        //根据接口名，请求接口参数，刷新界面
         $(this).parent().parent().parent().find("input").val($(this).text())
         $.post('/project_api', {'get': 'single_api', 'api_name': $(this).text()}, function(data){
+            //刷新请求方法
             $('button#method').text(data.method);
+            //刷新请求URL
             $('input#url').val(data.url);
-            $('tr.dam').remove();
+            
+            //刷新参数表格
             var j_data = JSON.parse(data.data)
             if (j_data != ''){
                 for (var key in j_data){
-                    var new_html = '<tr class="dam"><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
+                    var new_html = '<tr class="dam"><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><select class="form-control"><option value ="null" selected>Null</option><option value ="requirement">Requirement</option><option value="option">Option</option></select></td><td style="width:18%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
                     $('table#data').find('tr').last().after(new_html);
                     $('table#data').find('tr').last().find('td').eq(0).find('input').val(key);
-                    $('table#data').find('tr').last().find('td').eq(1).find('input').val(j_data[key]);
+                    $('table#data').find('tr').last().find('td').eq(1).find('input').val(j_data[key]["value"]);
+                    $('table#data').find('tr').last().find('td').eq(2).find('input').val(j_data[key]["desc"]);
+                    $('table#data').find('tr').last().find('td').eq(3).find('select').val(j_data[key]["O/R"]);
+                    $('table#data').find('tr').last().find('td').eq(4).find('input').val(j_data[key]["range"]);
                 };
             };
+            
+            //刷新请求头部参数表格
             var j_headers = JSON.parse(data.headers)
             if (j_headers != ''){
                 for (var key in j_headers){
@@ -110,6 +129,8 @@ $(function(){
                     $('table#req_h').find('tr').last().find('td').eq(1).find('input').val(j_headers[key]);
                 };
             };
+            
+            //刷新授权参数
             var j_auth = JSON.parse(data.auth)
             if (j_auth != 'none'){
                 if (j_auth['auth_method'] == 'Basic'){
@@ -123,8 +144,10 @@ $(function(){
             {
                 $('input#optionsRadios1').trigger("click");
             };
+            
+            //刷新参数包封
             var j_pak = JSON.parse(data.pak)
-            if (j_pak['type'] == 'ObjectList'){
+            if (j_pak['type'] == 'ListObject'){
                 $('input#options3').trigger("click");
                 $('input#pak_name').val(j_pak['object_name'])
             }
@@ -136,11 +159,15 @@ $(function(){
                 $('input#options1').trigger("click");
                 $('input#pak_name').val('')
                 };
+            
+            //刷新请求host
             var j_host = JSON.parse(data.host)
             if (j_host != '' && j_host != null){
                 $('input#ip').val(j_host['ip'])
                 $('input#port').val(j_host['port'])
             };
+            
+            //刷新自定义检验的参数表格
             var j_assert_data = JSON.parse(data.assert_data)
             if (j_assert_data != ''){
                 var assert_type = '<select class="form-control"><option value ="null">Null</option><option value ="value">Value</option><option value="exist">Exist</option><option value="length">Length</option><option value="range">Range</option><option value="set">Set</option></select>'
@@ -162,6 +189,8 @@ $(function(){
                     
                 };
             };
+            
+        //post完成后，统计参数个数    
         re_data_count()
         });
     });
@@ -178,20 +207,46 @@ $(function(){
     $("input:radio[name='pak']").click(function(){
         if ($(this).val() != "None"){
             $('[name="pak_name"]').attr('style', "display: block;")
+            if ($(this).val() == "ListObject"){
+                $('div[name="list_num"]').attr('style', "display: block;")
+            }
+            else{
+                $('div[name="list_num"]').attr('style', "display: none;");
+            }
         }
-        else{$('[name="pak_name"]').attr('style', "display: none;")};
+        else{$('[name="pak_name"]').attr('style', "display: none;");
+            $('div[name="list_num"]').attr('style', "display: none;");
+        };
+    });
+
+    // ListObject时，添加多个表格
+    $("button#add_list").click(function(){
+        var div = $('table#data').parent();
+        var fa = div.parent();
+        fa.find('div.list').last().after(div.clone());
+        var index = fa.find('div.list').index(fa.find('div.list').last())
+        fa.find('div.list').last().find('table').attr('id','data'+index)
     });
     
-    //参数添加，动态生成表格
+    // ListObject时，删除表格
+    $("button#del_list").click(function(){
+        var div = $('table#data').parent();
+        var fa = div.parent();
+        if (fa.find('div.list').length>1){
+            fa.find('div.list').last().remove()
+        }
+    });
+    
+    //头部参数添加，动态生成表格
     $("button#add").click(function(){
         var insert_html = '<tr class="dam"><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
         $(this).parent().parent().parent().find("tr").last().after(insert_html)
         if ($(this).parents('table').attr('id') == 'data'){re_data_count()}
     });
     
-    //json参数添加，动态生成表格
+    //data参数添加，动态生成表格
     $("button#add_json").click(function(){
-        var insert_html = '<tr class="dam"><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
+        var insert_html = '<tr class="dam"><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><select class="form-control"><option value ="null" selected>Null</option><option value ="requirement">Requirement</option><option value="option">Option</option></select></td><td style="width:18%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
         $(this).parent().parent().parent().find("tr").last().after(insert_html)
         if ($(this).parents('table').attr('id') == 'data'){re_data_count()}
     });
@@ -231,13 +286,13 @@ $(function(){
         if (port_val != ''){$('input#port').val(port_val)};
     });
     
-    //头部参数，表格点击时可编辑
+    //参数表格，表格点击时可编辑
     $('table').on('click', 'td', function(){
         $(this).find('input').removeAttr("style");
         $(this).find('input').focus();
     });
     
-    //头部参数，表格失去焦点时，隐藏input边框
+    //参数表格，表格失去焦点时，隐藏input边框
     $('table').on('blur', 'input', function(){
         $(this).attr("style", "border:none");
     });
@@ -253,7 +308,12 @@ $(function(){
         else if ($(this).val() == 'set'){obj_td.empty();obj_td.append('<input class="form-control"/>')}
     });
     
-    //删除校验值
+    //批量删除参数值
+    $('button#del_alldata').click(function(){
+        $('table#data').find('tr.dam').remove();
+    });
+    
+    //批量删除校验值
     $('button#del_assert').click(function(){
         $('tr.assert').remove();
     });
@@ -314,44 +374,70 @@ $(function(){
         };
         
         //下发参数获取
-        var host = $('input#ip').val() + ':' + $('input#port').val();
-        var url = $('input#url').val();
-        var method = $('button#method').text();
+        var host = $('input#ip').val().trim() + ':' + $('input#port').val().trim();
+        var url = $('input#url').val().trim();
+        var method = $('button#method').text().trim();
         var datas = '';
         var auth = 'none';
         var headers = '';
         var pak = '';
+        
+        //外层包封
+        pak = {'type': $('input:radio[name="pak"]:checked').val().trim(), 'object_name': $('input#pak_name').val().trim()}
+        
         //get/post数据，字典形式
         if ($('table#data').find('tr.dam').length > 0){
-            datas = {}
-            var elem = $('table#data').find('tr.dam')
-            for (var i=0;i<elem.length;i++){
-                var s = elem.eq(i).find('td').eq(1).find('input').val()
-                if (s.match('json:')){
-                    datas[elem.eq(i).find('td').eq(0).find('input').val()] = JSON.parse(s.split('json:')[1]);
-                }
-                else{
-                    datas[elem.eq(i).find('td').eq(0).find('input').val()] = s;
-                }
-            };
+            if (pak['type'] == 'ListObject'){
+                datas = [];
+                var div = $('div.list');
+                var count = div.length;
+                for (var j=0;j<count;j++){
+                    var tmp_data = {}
+                    var elem = div.eq(j).find('tr.dam')
+                    var len = elem.length
+                    for (var i=0;i<len;i++){
+                        var s = elem.eq(i).find('td').eq(1).find('input').val()
+                        if (s.match('json:')){
+                            tmp_data[elem.eq(i).find('td').eq(0).find('input').val().trim()] = JSON.parse(s.split('json:')[1].trim());
+                        }
+                        else{
+                            tmp_data[elem.eq(i).find('td').eq(0).find('input').val().trim()] = s.trim();
+                        }
+                    }; 
+                    datas[j] = tmp_data
+                };
+            }
+            else{
+                datas = {}
+                var elem = $('table#data').find('tr.dam')
+                for (var i=0;i<elem.length;i++){
+                    var s = elem.eq(i).find('td').eq(1).find('input').val()
+                    if (s.match('json:')){
+                        datas[elem.eq(i).find('td').eq(0).find('input').val()] = JSON.parse(s.split('json:')[1]);
+                    }
+                    else{
+                        datas[elem.eq(i).find('td').eq(0).find('input').val().trim()] = s.trim();
+                    }
+                };
+            }
         };
+        
         //授权数据
         if ($('input:radio[name="auth"]:checked').val() != 'None'){
             auth = {};
-            auth["auth_method"] = $('input:radio[name="auth"]:checked').val();
-            auth["username"] = $('input#auth_u').val();
-            auth["password"] = $('input#auth_p').val();
+            auth["auth_method"] = $('input:radio[name="auth"]:checked').val().trim();
+            auth["username"] = $('input#auth_u').val().trim();
+            auth["password"] = $('input#auth_p').val().trim();
         };
+        
         //请求头部参数
         if ($('table#req_h').find('tr.dam').length > 0){
             headers = {}
             var elem = $('table#req_h').find('tr.dam')
             for (var i=0;i<elem.length;i++){
-                headers[elem.eq(i).find('td').eq(0).find('input').val()] = elem.eq(i).find('td').eq(1).find('input').val()
+                headers[elem.eq(i).find('td').eq(0).find('input').val().trim()] = elem.eq(i).find('td').eq(1).find('input').val().trim()
             };
         };
-        //外层包封
-        pak = {'type': $('input:radio[name="pak"]:checked').val(), 'object_name': $('input#pak_name').val()}
             
         //ajax下发post数据
         $.post('/api_test', {'pak': JSON.stringify(pak), 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers)}, function(data){
@@ -365,6 +451,9 @@ $(function(){
                 var new_html = '<tr class="dam_res"><td>' + key + '</td><td>' + data.res_h[key] + '</td><tr>';
                 $('table#res_h').find('tr').last().after(new_html);
             };
+            
+            // 自定义校验响应参数
+            // 自定义表格为空时，生成初始校验表，以供用户自定义
             if ($('table#assert_tb').find('tr').length == 1){
                 var assert_obj = {}
                 parse_res(data.response, assert_obj)
@@ -374,35 +463,42 @@ $(function(){
                     $('table#assert_tb').find('tr').last().after(new_html);
                 };
             }
+            // 自定义表格非空时，根据表格内容逐条校验
             else{
                 var assert_obj = {}
                 parse_res(data.response, assert_obj)
                 var tr = $('table#assert_tb').find('tr.assert')
                 var count_error = 0
+                
                 for (var i=0;i<tr.length;i++){
                     var td1 = tr.eq(i).find('td').eq(0)
                     var td2 = tr.eq(i).find('td').eq(1)
                     var td3 = tr.eq(i).find('td').eq(2)
                     var td4 = tr.eq(i).find('td').eq(3)
                     td2.text(assert_obj[td1.text()])
+                    
+                    // 值校验
                     if (td3.find('select').val()=='value'){
                         if (td2.text()!=td4.find('input').val()){
                             tr.eq(i).attr('class', 'assert danger')
                             count_error += 1
                         }
                     }
+                    // 存在校验
                     else if (td3.find('select').val()=='exist'){
                         if (td2.text()=='-1'){
                             tr.eq(i).attr('class', 'assert danger')
                             count_error += 1
                         }
                     }
+                    // 长度校验
                     else if (td3.find('select').val()=='length'){
                         if (td2.text().length!=td4.find('input').val()){
                             tr.eq(i).attr('class', 'assert danger')
                             count_error += 1
                         }
                     }
+                    // 大小范围校验
                     else if (td3.find('select').val()=='range'){
                         var lit = td4.find('input').val().split('-')[0]
                         var lar = td4.find('input').val().split('-')[1]
@@ -411,6 +507,7 @@ $(function(){
                             count_error += 1
                         }
                     }
+                    // 取值集合校验
                     else if (td3.find('select').val()=='set'){
                         var set = td4.find('input').val().split(',')
                         if (!(set.includes(td2.text()))){
@@ -419,6 +516,7 @@ $(function(){
                         }
                     }
                 };
+                // 根据校验结果，刷新红色气泡
                 if (count_error > 0){$('a#er').append('<span class="badge" style="background-color:red">'+ count_error +'</span>')}
             }
         });
@@ -426,6 +524,7 @@ $(function(){
     
     //保存接口到项目
     $('button#save').click(function(){
+        //校验必填参数，失败后不让下发
         if ($('input#url').val() == ''){
             $("h4#myModalLabel").text("提示");
             $("div.modal-body").text("请输入接口地址！");
@@ -444,69 +543,69 @@ $(function(){
             $("button#send_alert").trigger("click");
             return
         }
-        /*
-        if ($('span#status_code').text() != '200'){
-            $("h4#myModalLabel").text("提示");
-            $("div.modal-body").text("接口测试成功后才能保存！");
-            $("button#send_alert").trigger("click");
-            return
-        }
-        */
+
        //下发参数获取
         var flag = '0'
         if ($(this).text() == '新增'){
             flag = '1' 
         }
-        var host = {'ip': $('input#ip').val(), 'port': $('input#port').val()}
-        var api_name = $('input#api').val();
-        var project_name = $('input#project').val();
-        var url = $('input#url').val();
-        var method = $('button#method').text();
+        var host = {'ip': $('input#ip').val().trim(), 'port': $('input#port').val().trim()}
+        var api_name = $('input#api').val().trim();
+        var project_name = $('input#project').val().trim();
+        var url = $('input#url').val().trim();
+        var method = $('button#method').text().trim();
         var datas = '';
         var auth = 'none';
         var headers = '';
         var assert_data = ''
         var pak = '';
+        
         //get/post数据，字典形式
         if ($('table#data').find('tr.dam').length > 0){
             datas = {}
             var elem = $('table#data').find('tr.dam')
             for (var i=0;i<elem.length;i++){
-                datas[elem.eq(i).find('td').eq(0).find('input').val()] = elem.eq(i).find('td').eq(1).find('input').val()
+                datas[elem.eq(i).find('td').eq(0).find('input').val().trim()] = {"value": elem.eq(i).find('td').eq(1).find('input').val().trim(),
+                "desc": elem.eq(i).find('td').eq(2).find('input').val().trim(), "O/R": elem.eq(i).find('td').eq(3).find('select').val().trim(),
+                    "range": elem.eq(i).find('td').eq(4).find('input').val().trim()}
             };
         };
+        
         //授权数据
         if ($('input:radio[name="auth"]:checked').val() != 'None'){
             auth = {};
-            auth["auth_method"] = $('input:radio[name="auth"]:checked').val();
-            auth["username"] = $('input#auth_u').val();
-            auth["password"] = $('input#auth_p').val();
+            auth["auth_method"] = $('input:radio[name="auth"]:checked').val().trim();
+            auth["username"] = $('input#auth_u').val().trim();
+            auth["password"] = $('input#auth_p').val().trim();
         };
+        
         //请求头部参数
         if ($('table#req_h').find('tr.dam').length > 0){
             headers = {}
             var elem = $('table#req_h').find('tr.dam')
             for (var i=0;i<elem.length;i++){
-                headers[elem.eq(i).find('td').eq(0).find('input').val()] = elem.eq(i).find('td').eq(1).find('input').val()
+                headers[elem.eq(i).find('td').eq(0).find('input').val().trim()] = elem.eq(i).find('td').eq(1).find('input').val().trim()
             };
         };
+        
         //校验参数
         if ($('table#assert_tb').find('td.av').find('input').length>0 || $('table#assert_tb').find('td.av').find('select').length>0){
             assert_data = {}
             obj = $('table#assert_tb').find('tr')
             for (var i=1;i<obj.length;i++){
                 var assert_value = ''
-                if (obj.eq(i).find('td').eq(3).find('select').length>0){assert_value = obj.eq(i).find('td').eq(3).find('select').val()}
-                else if (obj.eq(i).find('td').eq(3).find('input').length>0){assert_value = obj.eq(i).find('td').eq(3).find('input').val()};
-                assert_data[obj.eq(i).find('td').eq(0).text()] = {'assert_type': obj.eq(i).find('td').eq(2).find('select').val(),'assert_value': assert_value};
+                if (obj.eq(i).find('td').eq(3).find('select').length>0){assert_value = obj.eq(i).find('td').eq(3).find('select').val().trim()}
+                else if (obj.eq(i).find('td').eq(3).find('input').length>0){assert_value = obj.eq(i).find('td').eq(3).find('input').val().trim()};
+                assert_data[obj.eq(i).find('td').eq(0).text().trim()] = {'assert_type': obj.eq(i).find('td').eq(2).find('select').val(),'assert_value': assert_value};
             };
         };
+        
         //外层包封
-        pak = {'type': $('input:radio[name="pak"]:checked').val(), 'object_name': $('input#pak_name').val()}
+        pak = {'type': $('input:radio[name="pak"]:checked').val().trim(), 'object_name': $('input#pak_name').val().trim()}
         
         //ajax下发post数据
         $.post('/api_save', {'pak': JSON.stringify(pak), 'flag': flag, 'host': JSON.stringify(host), 'api_name': api_name, 'project_name': project_name, 'url': url, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers), 'assert_data':  JSON.stringify(assert_data)}, function(data){
-            if (data.code=200){
+            if (data.code==200){
                 $("h4#myModalLabel").text("提示");
                 $("div.modal-body").text("保存成功！");
                 $("button#send_alert").trigger("click");
