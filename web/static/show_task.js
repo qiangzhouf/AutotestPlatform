@@ -6,22 +6,23 @@ $(document).ready(function(){
     //监听推送消息
     socket.on('rec_push',function(data){
         if (data.code == '200'){
-            var s_msg = data.msg.replace(/\[/g,"").replace(/\]/g,"").replace(/\)/g,"").replace(/\ /g,"").replace("\(","");
-            var array_msg = s_msg.split('(');
-            for (var j=0;j<array_msg.length;j++){
-                var array_task = array_msg[j].split(',');
-                var tr = document.getElementById(array_task[0]);
-                var inp = document.getElementById('status-'+array_task[0]);
-                var tds = tr.getElementsByTagName("td");
-                tds[5].innerHTML = array_task[5].replace(/\'/g,"");
-                if (array_task[5] == '\'已完成\''){
-                    inp.setAttribute("disabled", "disabled");
-                    inp.setAttribute("value", "已完成");}
-                var div = tds[6].getElementsByTagName("div");
-                div[1].style = "width:" + array_task[6].replace(/\'/g,"");
-                div[1].innerHTML = array_task[6].replace(/\'/g,"");;
-                tds[8].innerHTML = array_task[8].replace(/\'/g,"");;
-                tds[9].innerHTML = array_task[9].replace(/\'/g,"");
+            var j_msg = JSON.parse(data.msg)
+            var conut = j_msg.length
+            for (var j=0;j<conut;j++){
+                var array_task = j_msg[j];
+                var tr = $('#'+array_task[0]);
+                var inp = tr.find('td').eq(10).find('input').eq(0)
+                var tds = tr.find("td");
+                tds.eq(5).text(array_task[5]);
+                if (array_task[5] == '已完成'){
+                    inp.attr("disabled", "disabled");
+                    inp.attr("value", "已完成");
+                }
+                var div = tds.eq(6).find("div div");
+                div.attr("style", "width:" + array_task[6]);
+                div.text(array_task[6]);
+                tds.eq(8).text(array_task[8]);
+                tds.eq(9).text(array_task[9]);
             }
         }
         else{

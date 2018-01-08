@@ -15,6 +15,7 @@ from threading import Lock
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
+from gevent import monkey; monkey.patch_all()
 
 
 # 配置
@@ -185,9 +186,9 @@ def push():
     while True:
         print('push...', push_list)
         s = connect_db()
-        msg = str(s.execute('select * from tasks order by id desc').fetchall())
+        msg = s.execute('select * from tasks order by id desc').fetchall()
         s.close()
-        socketio.emit('rec_push', {'code': 200, 'msg': msg}, namespace='/task_refresh')
+        socketio.emit('rec_push', {'code': 200, 'msg': json.dumps(msg)}, namespace='/task_refresh')
         socketio.sleep(3)
         if len(push_list) == 0:
             thread = None
