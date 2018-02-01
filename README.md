@@ -6,6 +6,7 @@
 ### 使用指南：
 <pre><code>
 git clone https://github.com/qiangzhouf/AutotestPlatform.git
+</pre></code>
 <pre><code>
 # python3.5, 安装下述三方库
 pip install selenium
@@ -24,7 +25,6 @@ python3 server.py
 cd AutotestPlatform/web
 uwsgi -i uwsgi.ini
 # 启动成功后，即可访问平台，进行项目添加，用例编写，任务调度运行
-
 </code></pre>
 
 ### 1、方案
