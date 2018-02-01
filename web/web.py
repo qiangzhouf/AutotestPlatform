@@ -567,9 +567,15 @@ def api_test():
             req_data = {pak_name+'Object': json.loads(request.form['data'])}
         elif pak == 'ListObject':
             if isinstance(json.loads(request.form['data']), list):
-                req_data = { pak_name+'ListObject': {pak_name+'Object': json.loads(request.form['data']) }}
+                if pak_name in ['VideoSlice', 'File', 'Image', 'Case']:
+                    req_data = { pak_name+'ListObject': {pak_name: json.loads(request.form['data']) }}
+                else:
+                    req_data = { pak_name+'ListObject': {pak_name+'Object': json.loads(request.form['data']) }}
             else:
-                req_data = { pak_name+'ListObject': {pak_name+'Object': [json.loads(request.form['data']) ]}}
+                if pak_name in ['VideoSlice', 'File', 'Image']:
+                    req_data = { pak_name+'ListObject': {pak_name: [json.loads(request.form['data']) ]}}
+                else:
+                    req_data = { pak_name+'ListObject': {pak_name+'Object': [json.loads(request.form['data']) ]}}
         else:
             req_data = json.loads(request.form['data'])
     req_auth = request.form['auth']
@@ -582,6 +588,7 @@ def api_test():
         if req_auth == '"none"':
             t = time.time()
             req = requests.get(req_url, params=req_data, headers=req_headers)
+            print(req.url)
             delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
         else:
             req_auth = json.loads(req_auth)
@@ -656,7 +663,15 @@ def project_api():
         return jsonify(project=project_list)
     elif request.form['get'] == 'api':
         api_list = g.db.execute('select * from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()
-        return jsonify(api=api_list)
+        tmp = {}
+        for elem in api_list:
+            k = elem[1].split('-')[0]
+            v = elem[1].replace(k+'-', '')
+            if k in tmp:
+                tmp[k].append(v)
+            else:
+                tmp[k] = [v]
+        return jsonify(api=tmp)
     elif request.form['get'] == 'single_api':
         api = g.db.execute('select * from api where name="%s";' % request.form['api_name']).fetchall()[0]
         return jsonify({'method':api[3], 'url':api[4], 'data':api[5], 'headers':api[6], 'auth':api[7], 'assert_data':api[8], 'host': api[9], 'pak': api[10]})

@@ -28,7 +28,7 @@
           <div class="input-group-btn">
               <button type="button" class="btn btn-default">接口名</button>
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
-            <ul class="dropdown-menu" id="api_name" style="height:500px;overflow:auto;">
+            <ul class="dropdown-menu" id="api_name" style="height:500px;overflow:auto" dir="rtl">
             </ul>
           </div>
           <input id="api" type="text" class="form-control" aria-label="...">
@@ -106,8 +106,9 @@
                  参数个数：<span id=count_data></span>
             </label>
           <div class="row" style="height:10px;"></div>
-          <div style="height:250px;overflow-y:auto;" class="list">
-              <table class="table table-condensed table-bordered" id="data">
+          <div class="list">
+            <div style="padding:0px 16px 0px 0px">
+              <table class="table table-condensed table-bordered" id="data_h" style="margin:0px">
                   <tr class="active">
                       <td style="width:18%">键（Key）</td>
                       <td style="width:18%">值（Value）</td>
@@ -117,7 +118,11 @@
                       <td style="width:10%" align="center"><button class="btn btn-default" id="add_json" style="padding:0px 8px"><font size="4">+</font></button>&nbsp;&nbsp;<button class="btn btn-default" id="del_alldata" style="padding:0px 8px"><font size="3">x</font></button></td>
                   </tr>
               </table>
-              <div class="row" style="height:10px;"></div>
+            </div>  
+            <div style="height:230px;overflow-y:auto;overflow-x:hidden;">
+              <table class="table table-condensed table-bordered" id="data"><tr></tr>
+              </table>
+            </div>
           </div>
       </div>
         <div class="row" style="height:10px;"></div>
@@ -231,6 +236,6 @@
      <div class="row" style="height:10px;"></div>
    </div>
 </div>
-    
+<div id="lay"></div>  
 
 {% endblock%}

@@ -15,13 +15,23 @@ function refresh_select()
         });
     }
     else{
+        $('div#lay').empty()
         $.post('/project_api', {'get': 'api', 'project_name': $('input#project').val()}, function(data){
             $('ul#api_name').empty();
             var new_html = ''
-            for (var i=0;i<data.api.length;i++){
-                new_html = new_html + '<li class="api"><a>' + data.api[i][1] + '</a></li>';
+            var sub_html = '<div id="api_b">'
+            for (key in data.api){
+                new_html = new_html + '<li class="api_fa"><a>' + key + '</a></li>';
+                sub_html = sub_html + '<div class="sub_api" style="position:absolute;z-index:999;background-color: #fff;border: 1px solid #ccc;border-radius: 4px;"><ul  style="list-style-type: none;margin:5px 0px;padding:0px;">'
+                for (var i=0;i<data.api[key].length;i++){
+                    sub_html = sub_html + '<li class="api"><a class="s_api" style="display:block;width: 100%;background:#fff;padding:3px 50px 3px 18px;text-decoration:none;color:#111;">' + data.api[key][i] + '</a></li>';
+                };
+                sub_html = sub_html + '</ul></div>'
            };
+            sub_html = sub_html + '</div>'
             $('ul#api_name').append(new_html)
+            $('div#lay').append(sub_html)
+            $('div.sub_api').hide()
         });
     }
 }
@@ -56,6 +66,12 @@ function parse_res(fa,res,f=''){
 function re_data_count(){
     var count = $('table#data').find('tr').length - 1
     $('span#count_data').text(count)
+    if (count <= 4){
+        $('table#data').parent().css('padding','0px 17px 0px 0px')
+    }
+    else{
+        $('table#data').parent().css('padding','0px')
+    }
 }
 
 
@@ -76,16 +92,42 @@ $(function(){
         $('input#api').val('')
     });
     
+    //接口多级菜单
+    $("ul#api_name").on('mouseover', 'li.api_fa', function(){
+        $(this).parent().find('li.api_fa').css("background", "#fff")
+        var i = $(this).parent().find('li.api_fa').index($(this))
+        var obj = $('div#lay').find('div.sub_api').eq(i)
+        obj.css({left:$(this).offset().left+$(this).outerWidth()-$(window).width()/12, top:$(this).offset().top-66})
+        obj.show()
+    });
+    $("ul#api_name").on('mouseout', 'li.api_fa',function(){
+        var i = $(this).parent().find('li.api_fa').index($(this))
+        var obj = $('div#lay').find('div.sub_api').eq(i)
+        obj.hide()
+    });
+    $("div#lay").on('mouseover', 'div.sub_api', function(){
+        $(this).show()
+    });
+    $("div#lay").on('mouseout', 'div.sub_api', function(){
+        $(this).hide()
+    });
+    $("div#lay").on('mouseover', 'a.s_api', function(){
+        $(this).css("background", "#eee")
+        var i = $(this).parents('div#api_b').find('div.sub_api').index($(this).parents('div.sub_api'))
+        $('ul#api_name').find('li.api_fa').eq(i).css("background", "#eee")
+    });
+    $("div#lay").on('mouseout', 'a.s_api', function(){
+        $(this).css("background", "#fff")
+    });
+    
     //接口选择，接口查看编辑修改
-    $("ul.dropdown-menu").on('click', 'li.api', function(){
+    $("div#lay").on('click', 'li.api', function(){
+        $(this).parents('div.sub_api').hide()
         //清除上一次响应数据
         //响应头部
         $('tr.dam_res').remove()
         //响应消息题
-        $('textarea#response-text').text('')
-        $('textarea#request-text').text('')
-        $('textarea#response-json').text('')
-        $('textarea#request-json').text('')
+        $('textarea').val('')
         //响应状态码、时间
         $('span#status_code').text('')
         $('span#request_time').text('')
@@ -98,8 +140,10 @@ $(function(){
         $('table#data').parent().nextAll('div.list').remove()
         
         //根据接口名，请求接口参数，刷新界面
-        $(this).parent().parent().parent().find("input").val($(this).text())
-        $.post('/project_api', {'get': 'single_api', 'api_name': $(this).text()}, function(data){
+        var i_num = $(this).parents('div#api_b').find('div.sub_api').index($(this).parents('div.sub_api'))
+        var tmp = $('ul#api_name').find('li.api_fa').eq(i_num).text() + '-' + $(this).text()
+        $('input#api').val(tmp)
+        $.post('/project_api', {'get': 'single_api', 'api_name': tmp}, function(data){
             //刷新请求方法
             $('button#method').text(data.method);
             //刷新请求URL
@@ -163,8 +207,12 @@ $(function(){
             //刷新请求host
             var j_host = JSON.parse(data.host)
             if (j_host != '' && j_host != null){
-                $('input#ip').val(j_host['ip'])
-                $('input#port').val(j_host['port'])
+                if ($('input#ip').val() == ''){
+                    $('input#ip').val(j_host['ip'])
+                };
+                if ($('input#port').val() == ''){
+                    $('input#port').val(j_host['port'])
+                };
             };
             
             //刷新自定义检验的参数表格
@@ -221,16 +269,17 @@ $(function(){
 
     // ListObject时，添加多个表格
     $("button#add_list").click(function(){
-        var div = $('table#data').parent();
+        var div = $('table#data').parents('div.list');
         var fa = div.parent();
         fa.find('div.list').last().after(div.clone());
         var index = fa.find('div.list').index(fa.find('div.list').last())
-        fa.find('div.list').last().find('table').attr('id','data'+index)
+        fa.find('div.list').last().find('table').eq(1).attr('id','data'+index)
+        fa.find('div.list').last().find('table').eq(0).attr('id','data_h'+index)
     });
     
     // ListObject时，删除表格
     $("button#del_list").click(function(){
-        var div = $('table#data').parent();
+        var div = $('table#data').parents('div.list');
         var fa = div.parent();
         if (fa.find('div.list').length>1){
             fa.find('div.list').last().remove()
@@ -241,14 +290,13 @@ $(function(){
     $("button#add").click(function(){
         var insert_html = '<tr class="dam"><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:30%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
         $(this).parent().parent().parent().find("tr").last().after(insert_html)
-        if ($(this).parents('table').attr('id') == 'data'){re_data_count()}
     });
     
     //data参数添加，动态生成表格
     $("button#add_json").click(function(){
         var insert_html = '<tr class="dam"><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><input style="border:none"/></td><td style="width:18%"><select class="form-control"><option value ="null" selected>Null</option><option value ="requirement">Requirement</option><option value="option">Option</option></select></td><td style="width:18%"><input style="border:none"/></td><td style="width:10%" align="center"><button class="btn btn-default" id="del" style="padding:0px 8px"><font size="3">x</font></button></td></tr>'
-        $(this).parent().parent().parent().find("tr").last().after(insert_html)
-        if ($(this).parents('table').attr('id') == 'data'){re_data_count()}
+        $('table#data').find("tr").last().after(insert_html)
+        if ($(this).parents('table').attr('id') == 'data_h'){re_data_count()}
     });
     
     //参数删除，动态删除表格
@@ -311,6 +359,7 @@ $(function(){
     //批量删除参数值
     $('button#del_alldata').click(function(){
         $('table#data').find('tr.dam').remove();
+        if ($(this).parents('table').attr('id') == 'data_h'){re_data_count()}
     });
     
     //批量删除校验值
@@ -322,10 +371,7 @@ $(function(){
     $('button#send').click(function(){
         //清除上一次响应数据
         $('tr.dam_res').remove()
-        $('textarea#response-text').text('')
-        $('textarea#request-text').text('')
-        $('textarea#response-json').text('')
-        $('textarea#request-json').text('')
+        $('textarea').val('')
         $('span#status_code').text('')
         $('span#request_time').text('')
         $('a#er span').remove()
@@ -443,10 +489,10 @@ $(function(){
         $.post('/api_test', {'pak': JSON.stringify(pak), 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers)}, function(data){
             $('span#status_code').text(data.status_code);
             $('span#request_time').text(data.request_time);
-            $('textarea#response-json').text(JSON.stringify(data.response, null, 4))
-            $('textarea#request-json').text(JSON.stringify(data.request, null, 4))
-            $('textarea#response-text').text(JSON.stringify(data.response))
-            $('textarea#request-text').text(JSON.stringify(data.request))
+            $('textarea#response-json').val(JSON.stringify(data.response, null, 4))
+            $('textarea#request-json').val(JSON.stringify(data.request, null, 4))
+            $('textarea#response-text').val(JSON.stringify(data.response))
+            $('textarea#request-text').val(JSON.stringify(data.request))
             for(var key in data.res_h){
                 var new_html = '<tr class="dam_res"><td>' + key + '</td><td>' + data.res_h[key] + '</td><tr>';
                 $('table#res_h').find('tr').last().after(new_html);
@@ -566,7 +612,7 @@ $(function(){
             var elem = $('table#data').find('tr.dam')
             for (var i=0;i<elem.length;i++){
                 datas[elem.eq(i).find('td').eq(0).find('input').val().trim()] = {"value": elem.eq(i).find('td').eq(1).find('input').val().trim(),
-                "desc": elem.eq(i).find('td').eq(2).find('input').val().trim(), "O/R": elem.eq(i).find('td').eq(3).find('select').val().trim(),
+                "desc": elem.eq(i).find('td').eq(2).find('input').val().trim(), "O/R": elem.eq(i).find('td').eq(3).find('select').val(),
                     "range": elem.eq(i).find('td').eq(4).find('input').val().trim()}
             };
         };
