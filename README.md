@@ -6,6 +6,7 @@
 ### 使用指南：
 <pre><code>
 git clone https://github.com/qiangzhouf/AutotestPlatform.git
+<pre><code>
 # python3.5, 安装下述三方库
 pip install selenium
 pip install flask
@@ -13,8 +14,12 @@ pip install flask_socketio
 pip install requests
 pip install uwsgi
 pip install gevent
+</code></pre>
+<pre><code>
 # 运行UI自动化服务
 python3 server.py
+</code></pre>
+<pre><code>
 # 启动web服务,启动器自定义uwsgi.ini配置
 cd AutotestPlatform/web
 uwsgi -i uwsgi.ini
