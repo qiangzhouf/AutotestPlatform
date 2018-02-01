@@ -5,12 +5,20 @@
 
 ### 使用指南：
 <pre><code>
-# python3.5
+git clone https://github.com/qiangzhouf/AutotestPlatform.git
+# python3.5, 安装下述三方库
 pip install selenium
 pip install flask
+pip install flask_socketio
 pip install requests
 pip install uwsgi
 pip install gevent
+# 运行UI自动化服务
+python3 server.py
+# 启动web服务,启动器自定义uwsgi.ini配置
+cd AutotestPlatform/web
+uwsgi -i uwsgi.ini
+# 启动成功后，即可访问平台，进行项目添加，用例编写，任务调度运行
 
 </code></pre>
 
