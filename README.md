@@ -3,6 +3,17 @@
         通过selenium提供的api，以web页面元素的xpath来唯一定位每个对象，然后操作对象（点击，输入，移动，获取信息等），来实现web测试自动化。为了应对前端界面的频繁变动，尽可能的减少用例的频繁修改，抽象出【页面-模板-数据】三层，动态组织用例。为了方便任务调度和用例编写增加了web界面，新增了接口测试界面。
         
 
+### 使用指南：
+<pre><code>
+# python3.5
+pip install selenium
+pip install flask
+pip install requests
+pip install uwsgi
+pip install gevent
+
+</code></pre>
+
 ### 1、方案
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/1.png)
 ### 2、模型
