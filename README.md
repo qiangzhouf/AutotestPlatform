@@ -6,6 +6,7 @@
 ### 使用指南：
 <pre><code>
 git clone https://github.com/qiangzhouf/AutotestPlatform.git
+
 </pre></code>
 <pre><code>
 # python3.5, 安装下述三方库
@@ -16,18 +17,21 @@ pip install flask_socketio
 pip install requests
 pip install uwsgi
 pip install gevent
+
 </code></pre>
 <pre><code>
-# 运行UI自动化服务
+# 运行UI自动化测试服务
 
 python3 server.py
+
 </code></pre>
 <pre><code>
 # 启动web服务,启动器自定义uwsgi.ini配置
 
 cd AutotestPlatform/web
 uwsgi -i uwsgi.ini
-（# 启动成功后，即可访问平台，进行项目添加，用例编写，任务调度运行）
+
+（启动成功后，即可访问自动化测试平台，进行项目添加，用例编写，任务调度运行；新增了http接口录入和测试的功能）
 </code></pre>
 
 ### 1、方案
