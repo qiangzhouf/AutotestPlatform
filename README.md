@@ -38,5 +38,9 @@ uwsgi -i uwsgi.ini
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/1.png)
 ### 2、模型
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/2.png)
-### 2、业务逻辑
+### 3、业务逻辑
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/3.png)
+
+
+### 新增的接口测试页面
+![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/4.png)
