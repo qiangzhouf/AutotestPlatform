@@ -1,7 +1,9 @@
+import sys
+import os
+sys.path.append(os.getcwd()+'/lib')
 import sqlite3
 import socket
 import time
-import os
 import platform
 import signal
 import shutil
@@ -16,6 +18,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
 from gevent import monkey; monkey.patch_all()
+from interface import *
 
 
 # 配置
@@ -560,6 +563,7 @@ def api_test():
     req_host = request.form['host']
     req_url = 'http://' + req_host + request.form['url']
     req_method = request.form['method']
+    project_name = request.form['project']
     if request.form['data'] == '""':
         req_data = {}
     else:
@@ -578,17 +582,23 @@ def api_test():
                     req_data = { pak_name+'ListObject': {pak_name+'Object': [json.loads(request.form['data']) ]}}
         else:
             req_data = json.loads(request.form['data'])
+    Interface.dynamic_params(req_data)
     req_auth = request.form['auth']
     if request.form['headers'] == '""':
         req_headers = {}
     else:
         req_headers = json.loads(request.form['headers'])
+   
+    if project_name == '车综平台':
+        if not Interface.cookie:
+            set_cookie('车综平台','公共-用户-用户登录')
+        req_headers['Cookie'] = Interface.cookie
         
     if req_method == 'GET':
         if req_auth == '"none"':
             t = time.time()
             req = requests.get(req_url, params=req_data, headers=req_headers)
-            print(req.url)
+            print('\n', "\033[1;32;40m%s\033[0m" % '[GET]', req.url)
             delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
         else:
             req_auth = json.loads(req_auth)
@@ -604,6 +614,7 @@ def api_test():
         if req_auth == '"none"':
             t = time.time()
             req = requests.post(req_url, json=req_data, headers=req_headers)
+            print('\n', "\033[1;32;40m%s\033[0m" % '[POST]', req.url, req_data)
             delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
         else:
             req_auth = json.loads(req_auth)

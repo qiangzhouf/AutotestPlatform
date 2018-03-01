@@ -486,7 +486,7 @@ $(function(){
         };
             
         //ajax下发post数据
-        $.post('/api_test', {'pak': JSON.stringify(pak), 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers)}, function(data){
+        $.post('/api_test', {'pak': JSON.stringify(pak), 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers), 'project': $('input#project').val()}, function(data){
             $('span#status_code').text(data.status_code);
             $('span#request_time').text(data.request_time);
             $('textarea#response-json').val(JSON.stringify(data.response, null, 4))
