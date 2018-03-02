@@ -673,6 +673,9 @@ def project_api():
         project_list = g.db.execute('select * from project;').fetchall()
         return jsonify(project=project_list)
     elif request.form['get'] == 'api':
+        if request.form['type'] == 'list':
+            api_list = [elem[0] for elem in g.db.execute('select name from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()]
+            return jsonify(api_list=api_list)
         api_list = g.db.execute('select * from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()
         tmp = {}
         for elem in api_list:
