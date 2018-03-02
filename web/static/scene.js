@@ -93,4 +93,26 @@ $(function(){
         obj.text(value)
         obj.attr('id', '');
     });
+    
+    //删除接口
+    $('table').on('click', 'button#g', function(){
+        var tb = $(this).parents('table')
+        $(this).parents('tr').remove();
+        var trs = tb.find('tr.dam');
+        for (i=0;i<trs.length;i++){
+            trs.eq(i).find('td').eq(0).text(i+1)
+        }
+    });
+    
+    //新增接口
+    $('table').on('click', 'button#n', function(){
+        var trs = $(this).parents('table').find('tr')
+        var html = '<tr style="height:200px" class="dam"><td  style="width:10%">'+trs.length+'</td>'
+        for (i=0;i<6;i++){
+            if (i==1 || i==2){html += '<td style="width:20%;overflow: hidden" class="dam"></td>'}
+            else{html += '<td style="width:10%;overflow: hidden" class="dam"></td>'}
+        };
+        html += '<td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button></td></tr>';
+        trs.last().after(html);
+    });
 });
