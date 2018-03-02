@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{url_for('static', filename='scene.js')}}"></script>
+
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-10"><h3>接口测试场景编写</h3></div>
+</div>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-6" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:20px;"></div>
+    <form class="form-inline">
+      <div class="form-group">
+        <label>项目:</label>
+        <select class="form-control" name="select_set" id="project">
+            <option value="none">请选择项目</option>
+            {% for project in projects %}
+            <option value={{project}} class="dam">{{project}}</option>
+            {% endfor %}
+        </select>
+        &nbsp;&nbsp;&nbsp;&nbsp;<label>场景名称:</label>
+        <input type="text" class="form-control" placeholder="场景不能重名" id="scene_name">
+      </div>
+          <button class="btn btn-primary" id="new_model">新 增</button>
+      <div class="form-group" style="margin:0px 50px">
+        <label>场景查看:</label>
+        <select class="form-control" name="select_set" id="scene">
+            <option value="none">请选择场景</option>
+        </select>
+      </div>
+    </form>
+    <div class="row" style="height:20px;"></div>
+  </div>
+</div>
+<br>
+
+<div class="row" id="sence_data" style="display:none">
+    <div class="col-md-1"></div>
+    <div class="col-md-10" style="padding: 0px">
+        <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;">
+            <tr id="case_params" class="info" id=-1>
+                <td><b>执行顺序</b></td>
+                <td><b>接口名称</b></td>
+                <td><b>请求参数</b></td>
+                <td><b>校验参数</b></td>
+                <td><b>中间变量</b></td>
+                <td><b>清除变量</b></td>
+                <td><b>准备时间</b></td>
+                <td align='center'>
+                    <button class="btn btn-danger" id="zmd">提交修改</button>
+                    <button class="btn btn-success" id="g" style="padding:0px 8px"><font size="4">+</font> </button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

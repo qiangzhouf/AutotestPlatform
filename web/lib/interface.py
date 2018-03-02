@@ -92,19 +92,20 @@ class Interface:
                     str(self.result.request.headers)+'\n'+str(self.params)+'\n'+
                     '响应:'+'\n'+'*'*60+'\n'+str(self.result.status_code)+'\n'+
                     str(self.result.headers)+'\n'+str(self.result.json()))
+            return True
         except Exception as e:
             self.result = None
             logger.error('Interface %s requested failed!' % self.url + '\n' + str(e))
             logger.debug('Interface %s request and response info:' % self.url+'\n'+
                     '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+self.url+'\n'+
                     str(self.headers)+'\n'+str(self.params))
-            
+            return False
         
     # 响应结果校验
     def assert_response(self, k_v):
         if self.result == None:
             logger.error(self.url+ '  request failed,assert operation is invailed!')
-            return
+            return False
         k_v = self.g_replace(k_v)
         for k in k_v:
             try:
@@ -123,6 +124,8 @@ class Interface:
             except:
                 logger.error(self.url + '  Assert failed!  '
                              +k+':'+str(o_obj)+'|'+str(obj))
+                return False
+        return True
     
     # 响应结果json数据获取
     def get_json(self, key):

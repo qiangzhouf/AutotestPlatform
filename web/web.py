@@ -724,3 +724,24 @@ def api_save():
             return jsonify(code=200)
         except Exception as msg:
             return jsonify(code=500, msg=msg)
+
+
+@app.route('/interf_scene', methods=['GET', 'POST'])
+def interf_scene():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    if request.method == 'GET':
+        project = [elem[0] for elem in g.db.execute('select name from project;').fetchall()]
+        return render_template('interf_scene.html', projects=project)
+    elif request.method == 'POST':
+        project = request.form['project']
+        if request.form['type'] == 'get_scene_data':
+            scene = request.form['scene']
+            data = g.db.execute('select data from scene where name="%s" and project="%s";' % (scene, project)).fetchall()[0][0].split(',')
+            s_key = g.db.execute('select id from scene where name="%s" and project="%s";' % (scene, project)).fetchall()[0][0]
+            cases = []
+            for elem in data:
+                cases.append(g.db.execute('select name,data,assert_data,save_data,del_data,pre_time from "case" where name="%s" and project="%s" and s_key="%s"' % (elem, project, s_key)).fetchall()[0])
+            return jsonify(cases=cases)
+        scene = [elem[0] for elem in g.db.execute('select name from scene where project="%s";' % project).fetchall()]
+        return jsonify(scene=scene)
