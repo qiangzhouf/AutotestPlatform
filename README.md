@@ -31,7 +31,7 @@ python3 server.py
 cd AutotestPlatform/web
 uwsgi -i uwsgi.ini
 
-（启动成功后，即可访问自动化测试平台，进行项目添加，用例编写，任务调度运行；新增了http接口录入和测试的功能）
+（启动成功后，即可访问自动化测试平台(admin/intedio)，进行项目添加，用例编写，任务调度运行；新增了http接口录入和测试的功能）
 </code></pre>
 
 ### 1、方案
