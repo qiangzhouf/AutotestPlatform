@@ -23,8 +23,8 @@ class Case:
     
     def __init__(self, project, name, data=None, assert_data=None, 
                  save_data=None, del_data=None, pre_time=0):
-        self.name = project+'|'+name
-        self.interface = interf(project, name)
+        self.name = project+name
+        self.interface = interf(name, project)
         self.data = data
         self.assert_data = assert_data
         self.save_data = save_data
@@ -64,21 +64,4 @@ class Case:
             self.interface.g_pop(self.del_data)
             
         return self.name, self.status, log_file
-
-
-# 测试代码
-if __name__ == '__main__':
-    
-    set_cookie('车综平台', '公共-用户-用户登录')
-    
-    c = Case('车综平台','接入-获取卡口列表','',{"message": "数据获取成功"},['data.*r.nodeCode', 'data.*r'])
-    print(c.run())
-    
-    c = Case('车综平台','接入-卡口导图',{'magic':'hfrz','cmd':'addinfo','deviceId':'*g.data.*r..nodeCode','direction':'*g.data.*r..platformDirection',
-                     'imageData':'*base64./home/zhou/work/AutotestPlatform/web/image/fakeCar/1517284393960_6257265818146406400.jpg',
-                    'snapshotTime':'*now'},{"message": "success"})
-    print(c.run())
-    
-    c = Case('车综平台','车辆预警-假套无牌车',{'autoRecognizeResult':1, 'sortKey':'snapshotTime', 'startTime':'*now-0.1','endTime':'*now+0.1', 'carPlateNumber':'豫A00013','rows':1,'sortType':'desc','aggPlate':0,'start':0,'timeMode':0},{"data.0.autoRecognizeResultName": "假牌车","data.0.tollgateDeviceId":'*g.data.*r..nodeId', 'data.0.carPlateNumber':'豫A00013'},'',['data.*r.nodeCode', 'data.*r'],30)
-    print(c.run())
     

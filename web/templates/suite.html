@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{url_for('static', filename='suite.js')}}"></script>
+
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-10"><h3>测试套管理</h3></div>
+</div>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-7" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:20px;"></div>
+    <form class="form-inline">
+      <div class="form-group">
+        <label>项目:</label>
+        <select class="form-control" name="select_set" id="project">
+            <option value="none">请选择项目</option>
+            {% for project in projects %}
+            <option value={{project}} class="dam">{{project}}</option>
+            {% endfor %}
+        </select>
+        &nbsp;&nbsp;&nbsp;&nbsp;<label>测试套名称:</label>
+        <input type="text" class="form-control" placeholder="测试套不能重名" id="suite_name">
+      </div>
+          <button class="btn btn-primary" id="new_suite" type="button">新 增</button>
+        <button id="send_alert" class="btn btn-lg" data-toggle="modal" data-target="#myModal" type="button" style="display:none"></button>
+      <div class="form-group" style="margin:0px 50px">
+        <label>测试套查看:</label>
+        <select class="form-control" name="select_set" id="suite">
+            <option value="none">请选择测试套</option>
+        </select>
+          <button class="btn btn-danger" id="modify" type="button">修 改</button>
+      </div>
+        
+    </form>
+    <div class="row" style="height:20px;"></div>
+  </div>
+</div>
+<br>
+
+<div class="row" id="suite_data" style="display:none">
+    <div class="col-md-1"></div>
+    <div class="col-md-3" style="padding: 0px">
+        <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;" id='all_scene'>
+            <tr class="info"><td colspan="2" align='center'><b>全部场景</b></td></tr>
+            <tr class="info">
+                <td style="width:70%">场景名</td>
+                <td style="width:30%">操作</td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-md-1" style="padding: 0px"></div>
+    <div class="col-md-3" style="padding: 0px">
+        <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;" id = 'my_scene'>
+            <tr class="info"><td colspan="2" align='center'><b>已添加场景</b></td></tr>
+            <tr class="info">
+                <td style="width:70%">场景名</td>
+                <td style="width:30%">操作</td>
+                <!--
+                <td align='center'>
+                    <button class="btn btn-default" id="add">>></button>
+                </td>
+-->
+            </tr>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

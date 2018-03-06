@@ -19,6 +19,7 @@ from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
 from gevent import monkey; monkey.patch_all()
 from interface import *
+from scene import *
 
 
 # 配置
@@ -171,7 +172,7 @@ def write_xml(xml_file, data, flag=1):
 def ws_connect():
     global push_list, thread
     push_list.append(1)
-    print('Client connected', push_list, thread)
+    # print('Client connected', push_list, thread)
     with thread_lock:
         if thread == None:
             thread = socketio.start_background_task(target=push)
@@ -181,13 +182,13 @@ def ws_connect():
 def ws_disconnect():
     global push_list
     push_list.pop()
-    print('Client disconnected', push_list, thread)
+    # print('Client disconnected', push_list, thread)
 
 
 def push():
     global push_list, thread
     while True:
-        print('push...', push_list)
+        # print('push...', push_list)
         s = connect_db()
         msg = s.execute('select * from tasks order by id desc').fetchall()
         s.close()
@@ -591,7 +592,7 @@ def api_test():
    
     if project_name == '车综平台':
         if not Interface.cookie:
-            set_cookie('车综平台','公共-用户-用户登录')
+            set_cookie('公共-用户-用户登录', '车综平台')
         req_headers['Cookie'] = Interface.cookie
         
     if req_method == 'GET':
@@ -689,7 +690,16 @@ def project_api():
     elif request.form['get'] == 'single_api':
         api = g.db.execute('select * from api where name="%s";' % request.form['api_name']).fetchall()[0]
         return jsonify({'method':api[3], 'url':api[4], 'data':api[5], 'headers':api[6], 'auth':api[7], 'assert_data':api[8], 'host': api[9], 'pak': api[10]})
-
+    elif request.form['get'] == 'api_data':
+        project = request.form['project_name']
+        api = request.form['api_name']
+        data = json.loads(g.db.execute('select data from api where name="%s" and project_name="%s";' % (api, project)).fetchall()[0][0])
+        for key in data:
+            data[key] = data[key]['value']
+        assert_data = json.loads(g.db.execute('select assert from api where name="%s" and project_name="%s";' % (api, project)).fetchall()[0][0])
+        for key in assert_data:
+            assert_data[key] = assert_data[key]['assert_value']
+        return jsonify(data=data, assert_data=assert_data)
 
 @app.route('/api_save', methods=['POST'])
 def api_save():
@@ -740,11 +750,65 @@ def interf_scene():
         project = request.form['project']
         if request.form['type'] == 'get_scene_data':
             scene = request.form['scene']
-            data = g.db.execute('select data from scene where name="%s" and project="%s";' % (scene, project)).fetchall()[0][0].split(',')
+            data = g.db.execute('select data from scene where name="%s" and project="%s";' % (scene, project)).fetchall()[0][0]
+            if data is None:
+                return jsonify(cases=[])
+            else:
+                data = data.split(',')
             s_key = g.db.execute('select id from scene where name="%s" and project="%s";' % (scene, project)).fetchall()[0][0]
             cases = []
             for elem in data:
-                cases.append(g.db.execute('select name,data,assert_data,save_data,del_data,pre_time from "case" where name="%s" and project="%s" and s_key="%s"' % (elem, project, s_key)).fetchall()[0])
+                cases.append(g.db.execute('select name,data,assert_data,save_data,del_data,pre_time from "case" where name="%s" and s_key="%s"' % (elem, s_key)).fetchall()[0])
             return jsonify(cases=cases)
+        elif request.form['type'] == 'new':
+            if (request.form['name'],) in g.db.execute('select name from scene where project="%s";' % (request.form['project'])).fetchall():
+                return jsonify(code=201, message='场景名重复！')
+            else:
+                g.db.execute('insert into scene (name, project) values("%s", "%s");' % (request.form['name'], request.form['project']))
+                g.db.commit()
+                return jsonify(code=200, message='场景新建成功，请补充用例！')
+        elif request.form['type'] == 'modify':
+            api_list = json.loads(request.form['data'])
+            api_data = json.loads(request.form['case_data'])
+            name = request.form['scene']
+            Scene.modify([project, name, api_list], api_data)
+            return jsonify(code=200, message='场景《%s》修改成功' % name)
         scene = [elem[0] for elem in g.db.execute('select name from scene where project="%s";' % project).fetchall()]
         return jsonify(scene=scene)
+    
+
+@app.route('/suite', methods=['GET', 'POST'])
+def suite():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    if request.method == 'GET':
+        project = [elem[0] for elem in g.db.execute('select name from project;').fetchall()]
+        return render_template('suite.html', projects=project)
+    elif request.method == 'POST':
+        if request.form['type'] == 'get_suite':
+            suite = [elem[0] for elem in g.db.execute('select name from suite where project="%s";' % request.form['project']).fetchall()]
+            return jsonify(suite=suite)
+        elif request.form['type'] == 'get_scene':
+            all_scene = [elem[0] for elem in g.db.execute('select name from scene where project="%s";' % request.form['project']).fetchall()]
+            scene = g.db.execute('select data from suite where name="%s"' % request.form['suite']).fetchall()[0][0]
+            if scene is None or scene=='':
+                scene = []
+            else:
+                scene = scene.split(',')
+            for i in scene:
+                all_scene.remove(i)
+            return jsonify(all_scene=all_scene, scene=scene)
+        elif request.form['type'] == 'modify_suite':
+            scene_data = ','.join(json.loads(request.form['data']))
+            g.db.execute('update suite set data="%s" where name="%s" and project="%s"' % (scene_data, request.form['name'], request.form['project']))
+            g.db.commit()
+            return jsonify(code=200, message="测试套《%s》修改成功！" % request.form['name'])
+                         
+@app.route('/interf_task', methods=['GET', 'POST'])
+def interf_task():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    if request.method == 'GET':
+        project = [elem[0] for elem in g.db.execute('select name from project;').fetchall()]
+        return render_template('interf_task.html', projects=project)
+        

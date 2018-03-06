@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{url_for('static', filename='interf_task.js')}}"></script>
+
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-10"><h3>任务创建</h3></div>
+</div>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-6" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:20px;"></div>
+    <form class="form-inline">
+      <div class="form-group">
+        <label>项目:</label>
+        <select class="form-control" name="select_set" id="project">
+            <option value="none">请选择项目</option>
+            {% for project in projects %}
+            <option value={{project}} class="dam">{{project}}</option>
+            {% endfor %}
+        </select>
+      </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="form-group">
+        <label>测试套:</label>
+        <select class="form-control" name="select_set" id="suite">
+            <option value="none">请选择测试套</option>
+        </select>
+      </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <div  class="form-group">
+         <label>任务名称:</label>
+        <input type="text" class="form-control" placeholder="任务不能重名" id="task_name">
+        <button class="btn btn-primary" id="new_task" type="button">新 增</button>
+            <button id="send_alert" class="btn btn-lg" data-toggle="modal" data-target="#myModal" type="button" style="display:none"></button>
+        </div>
+        
+    </form>
+    <div class="row" style="height:20px;"></div>
+  </div>
+</div>
+<br>
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-10">
+    <hr>
+    <h3>任务管理</h3>
+  </div>
+</div>
+  
+<div class="row">
+  <div class="col-md-1"></div>
+  <div style="padding:0px" class="col-md-10">
+  <table  class="table table table-hover" style="background:#FFF">
+  	<tr class="info">
+  		<td><b>序号</b></td>
+  		<td><b>任务名称</b></td>
+  		<td><b>测试套</b></td>
+  		<td><b>项目</b></td>
+  		<td><b>执行时间</b></td>
+  		<td><b>状态</b></td>
+  		<td><b>进度</b></td>
+  		<td><b>场景总数</b></td>
+  		<td><b>通过数</b></td>
+  		<td><b>通过率</b></td>
+  		<td><b>操作</b></td>
+  	</tr>
+  </table>
+  </div>
+</div>
+
+
+{% endblock %}

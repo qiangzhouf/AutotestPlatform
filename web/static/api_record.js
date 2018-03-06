@@ -16,7 +16,7 @@ function refresh_select()
     }
     else{
         $('div#lay').empty()
-        $.post('/project_api', {'get': 'api', 'project_name': $('input#project').val()}, function(data){
+        $.post('/project_api', {'get': 'api', 'project_name': $('input#project').val(), 'type':''}, function(data){
             $('ul#api_name').empty();
             var new_html = ''
             var sub_html = '<div id="api_b">'
@@ -43,16 +43,13 @@ function parse_res(fa,res,f=''){
         if (typeof(fa[key])=='object'){
             try {
                 if (fa[key].length > 0){
-                    f = f + key + '[0].';
-                    parse_res(fa[key][0],res,f)
+                    parse_res(fa[key][0],res,f + key + '.0.')
                 }
                 else{
-                f = f + key + '.';
-                parse_res(fa[key],res,f)
+                parse_res(fa[key],res,f + key + '.')
                 }
             } catch(error) {
-                f = f + key + '.';
-                parse_res(fa[key],res,f)
+                parse_res(fa[key],res,f + key + '.')
             };
         }
         else{
@@ -505,7 +502,7 @@ $(function(){
                 parse_res(data.response, assert_obj)
                 var assert_type = '<select class="form-control"><option value ="null">Null</option><option value ="value">Value</option><option value="exist">Exist</option><option value="length">Length</option><option value="range">Range</option><option value="set">Set</option></select>'
                 for(var key in assert_obj){
-                    var new_html = '<tr class="assert"><td>' + key + '</td><td>' + assert_obj[key] + '</td><td>' + assert_type + '</td><td class="av"></td></tr>';
+                    var new_html = '<tr class="assert"><td style="width:20%;overflow:hidden">' + key + '</td><td style="width:25%;overflow:hidden">' + assert_obj[key] + '</td><td style="width:20%;overflow:hidden">' + assert_type + '</td><td class="av" style="width:25%;overflow:hidden""></td></tr>';
                     $('table#assert_tb').find('tr').last().after(new_html);
                 };
             }

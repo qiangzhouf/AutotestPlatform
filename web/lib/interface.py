@@ -21,6 +21,7 @@ import time
 import sqlite3
 import base64
 import random
+import os
 from mylog import *
 
 
@@ -70,7 +71,7 @@ class Interface:
         for k in k_v:
             if isinstance(k_v[k], str):
                 if '*base64.' in k_v[k]:
-                    k_v[k] = img_b64(k_v[k].replace('*base64.', ''))
+                    k_v[k] = img_b64(os.getcwd() + '/image/'+ k_v[k].replace('*base64.', ''))
             self.params[k] = k_v[k]
     
     # 下发接口
@@ -194,17 +195,19 @@ class Interface:
             elif '*now-' in params[key]:
                 interval = int(float(params[key].split('-')[1])*3600*1000)
                 params[key] = int(time.time()*1000) - interval
+            elif '*base64.' in params[key]:
+                    params[key] = img_b64(os.getcwd() + '/image/'+ params[key].replace('*base64.', ''))
 
 
 # 登陆获取cookie，并保存到Interfa的类变量中
-def set_cookie(project, interface_name):
-    i = interf(project, interface_name)
+def set_cookie(interface_name, project):
+    i = interf(interface_name, project)
     i.request()
     Interface.cookie = i.result.headers['Set-Cookie'].split(';')[0]
     
 
 # 从数据库api表中读取接口参数，并实例化对象
-def interf(project, interface_name):
+def interf(interface_name, project):
     db = sqlite3.connect(Interface.db_path)
     result = db.execute('select method,url,data'
                   ' from api where project_name="%s" and name="%s"'
@@ -220,40 +223,4 @@ def interf(project, interface_name):
 def img_b64(img_path):
     with open(img_path, 'rb') as f:
         return base64.b64encode(f.read()).decode('utf-8') 
-    
-
-# 测试代码
-if __name__ == '__main__':
-    # 登陆获取coikie
-    set_cookie('车综平台', '公共-用户-用户登录')
-    
-    # 获取卡口id
-    i = interf('车综平台','接入-获取卡口列表')
-    i.request()
-    i.assert_response({"message": "数据获取成功"})
-    i.g_push(['data.*r.nodeCode', 'data.*r'])
-    
-    # 上传假牌车图片
-    i = interf('车综平台','接入-卡口导图')
-    i.modify_params({'magic':'hfrz','cmd':'addinfo','deviceId':'*g.data.*r..nodeCode','direction':'*g.data.*r..platformDirection',
-                     'imageData':'*base64./home/zhou/work/AutotestPlatform/web/image/fakeCar/1517284393960_6257265818146406400.jpg',
-                    'snapshotTime':'*now'})
-    i.request()
-    i.assert_response({"message": "success"})
-    
-    # 等待系统处理
-    time.sleep(5)
-    
-    # 假牌车预警查询
-    i = interf('车综平台','车辆预警-假套无牌车')
-    i.modify_params({'autoRecognizeResult':1, 'sortKey':'snapshotTime', 'startTime':'*now-0.1','endTime':'*now+0.1',
-                    'carPlateNumber':'豫A00013','rows':1,'sortType':'desc','aggPlate':0,'start':0,'timeMode':0})
-    i.request()
-    i.assert_response({"data.0.autoRecognizeResultName": "假牌车","data.0.tollgateDeviceId":'*g.data.*r..nodeId',
-                      'data.0.carPlateNumber':'豫A00013'})
-    i.g_pop(['data.*r.nodeCode', 'data.*r'])
-    
-    
-
-    
     
