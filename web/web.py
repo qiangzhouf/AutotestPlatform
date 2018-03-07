@@ -811,4 +811,22 @@ def interf_task():
     if request.method == 'GET':
         project = [elem[0] for elem in g.db.execute('select name from project;').fetchall()]
         return render_template('interf_task.html', projects=project)
+    elif request.method == 'POST':
+        if request.form['type'] == 'get_task':
+            task = g.db.execute('select * from interf_task where project="%s" order by id desc' % request.form['project']).fetchall()
+            return jsonify(task=task)
+        elif request.form['type'] == 'new_task':
+            task_name = request.form['name']
+            project = request.form['project']
+            suite = request.form['suite']
+            if (task_name,) in g.db.execute('select name from interf_task where project="%s";' % project).fetchall():
+                return jsonify(code=201, message="任务名称重复！")
+            scene_num = len(g.db.execute('select data from suite where name="%s" and project="%s";' % (suite, project)).fetchall()[0][0].split(','))
+            g.db.execute('insert into interf_task(name,suite,project,scene_num) values("%s","%s","%s","%d");' % (task_name,suite,project,scene_num))
+            g.db.commit()
+            return jsonify(code=200)
+        elif request.form['type'] == 'del_task':
+            g.db.execute('delete from interf_task where name="%s" and project="%s";' % (request.form['name'], request.form['project']))
+            g.db.commit()
+            return jsonify(code=200, message="任务删除成功！")
         
