@@ -38,7 +38,7 @@ uwsgi -i uwsgi.ini
 （启动成功后，即可访问自动化测试平台(admin/intedio)）
 </code></pre>
 
-### 示例
+### 示例：
 #### 接口自动化测试模块
 1、单个接口录入
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/1.png)
