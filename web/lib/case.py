@@ -23,7 +23,7 @@ class Case:
     
     def __init__(self, project, name, data=None, assert_data=None, 
                  save_data=None, del_data=None, pre_time=0):
-        self.name = project+name
+        self.name = name
         self.interface = interf(name, project)
         self.data = data
         self.assert_data = assert_data

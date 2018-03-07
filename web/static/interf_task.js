@@ -23,20 +23,26 @@ function refresh_task(){
                         }
                     }
                     else if (j==6){
-                        html = html + '<td style="width:15%"><div class="progress progress-striped active"><div class="progress-bar" style="width: ' + data.task[i][j] + ';">' + data.task[i][j] + '</div></div></td>'
+                        html = html + '<td style="width:15%"><div class="progress progress-striped active"><div class="progress-bar" style="width: ' + data.task[i][j] + '%;">' + data.task[i][j] + '%' + '</div></div></td>'
                     }
                     else if (j==10){
                         if (data.task[i][5]==1){
-                            html += '<td style="width:20%"><button id="start" class="btn btn-success" disabled="disabled">启动</button>    '
+                            html += '<td style="width:15%"><button id="start" class="btn btn-success" disabled="disabled">启动</button>    '
                         }
                         else{
-                            html += '<td style="width:20%"><button id="start" class="btn btn-success">启动</button>    '
+                            html += '<td style="width:15%"><button id="start" class="btn btn-success">启动</button>    '
                         };
                        html += '<button id="del" class="btn btn-danger">删除</button>    <button id="detail" class="btn btn-primary">详情</button></td>'; 
                     }
                     else{
-                        if (7<=j<=9){
+                        if (j==7 || j==8){
                             html = html + '<td style="width:5%">'+data.task[i][j]+'</td>';
+                        }
+                        else if(j==9){
+                            html = html + '<td style="width:5%">'+data.task[i][j]+'%'+'</td>';
+                        }
+                        else if(j==4){
+                            html = html + '<td style="width:15%">'+data.task[i][j]+'</td>';
                         }
                         else{
                             html = html + '<td style="width:10%">'+data.task[i][j]+'</td>';
@@ -58,6 +64,14 @@ function tc(info, message){
 
 
 $(function(){
+    //建立webscoket，持续监听后台推送信息，刷新任务实时数据
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/task_i');
+    socket.on('task_data', function(data) {
+        if (data.msg=='ok'){
+            refresh_task()
+        };
+    });
+
     //选择项目后，动态加载测试套
     $('select#project').change(function(){
         if ($(this).val() != 'none'){
@@ -117,6 +131,19 @@ $(function(){
             }
             else{
                 tc('提示', '任务删除失败！')
+            };
+        });
+    });
+    
+    //启动任务
+    $('table#task').on('click', 'button#start', function(){
+        var name = $(this).parents('tr').find('td').eq(1).text();
+        $.post('/interf_task', {'type': 'start_task', 'name': name, 'project': $('select#project').val()}, function(data){
+            if (data.code == 200){
+                refresh_task()
+            }
+            else{
+                tc('提示', '任务启动失败')
             };
         });
     });

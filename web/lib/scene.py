@@ -16,7 +16,7 @@ class Scene:
         self.s_key = None
         self.project = project
         self.data = self.get_case_data(self.get_scene_data(scene_name))
-        self.name = project+'|'+scene_name
+        self.name = scene_name
         self.status = []
         
     def get_scene_data(self, scene_name):

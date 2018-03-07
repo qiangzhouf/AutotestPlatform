@@ -13,13 +13,13 @@ import subprocess
 from flask_socketio import SocketIO, emit
 import json
 import xml.etree.ElementTree as ET
-from threading import Lock
+from threading import Lock, Thread
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
 from gevent import monkey; monkey.patch_all()
 from interface import *
-from scene import *
+from task import *
 
 
 # 配置
@@ -803,7 +803,8 @@ def suite():
             g.db.execute('update suite set data="%s" where name="%s" and project="%s"' % (scene_data, request.form['name'], request.form['project']))
             g.db.commit()
             return jsonify(code=200, message="测试套《%s》修改成功！" % request.form['name'])
-                         
+     
+    
 @app.route('/interf_task', methods=['GET', 'POST'])
 def interf_task():
     if not session.get('logged_in'):
@@ -829,4 +830,45 @@ def interf_task():
             g.db.execute('delete from interf_task where name="%s" and project="%s";' % (request.form['name'], request.form['project']))
             g.db.commit()
             return jsonify(code=200, message="任务删除成功！")
+        elif request.form['type'] == 'start_task':
+            g.db.execute('update interf_task set run_time="%s",progress="0",pass_num=0,pass_rate="0",status=1 where name="%s" and project="%s";' % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),request.form['name'],request.form['project']))
+            g.db.commit()
+            t = Task(request.form['name'],request.form['project'])
+            t.run()
+            return jsonify(code=200)
+        
+        
+@socketio.on('connect', namespace='/task_i')
+def push_task_i():
+    s = connect_db()
+    conn_num = s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0]+1
+    conn_num = s.execute('update push set conn_num="%d" where namespace="/task_i"' % conn_num)
+    s.commit()
+    if not s.execute('select status from push where namespace="/task_i"').fetchall()[0][0]:
+        s.execute('update push set status=1 where namespace="/task_i"')
+        s.commit()
+        t = Thread(target=refresh_task_i)
+        t.start()
+    s.close()
+        
+@socketio.on('disconnect', namespace='/task_i')
+def del_conn():
+    s = connect_db()
+    conn_num = s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0]-1
+    conn_num = s.execute('update push set conn_num="%d" where namespace="/task_i"' % conn_num)
+    s.commit()
+    s.close()
+    
+def refresh_task_i():
+    s = connect_db()
+    while True:
+        time.sleep(6)
+        if s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0] == 0:
+            s.execute('update push set status=0 where namespace="/task_i"')
+            s.commit()
+            s.close()
+            break
+        else:
+            socketio.emit('task_data', {'msg': 'ok'}, namespace='/task_i')
+            
         
