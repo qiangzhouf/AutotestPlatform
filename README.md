@@ -1,4 +1,4 @@
-# AutotestPlatform
+# AutotestPlatform（自动化测试平台）
 ### 概述：
 ####        1、接口自动化测试模块：
             单接口录入/测试，多个接口组织场景，多个场景组成测试套，选择测试套进行任务执行和报告生成。
@@ -38,7 +38,7 @@ uwsgi -i uwsgi.ini
 （启动成功后，即可访问自动化测试平台(admin/intedio)）
 </code></pre>
 
-### 示例
+### 示例：
 #### 接口自动化测试模块
 1、单个接口录入
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/1.png)
