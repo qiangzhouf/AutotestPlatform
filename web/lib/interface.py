@@ -25,9 +25,6 @@ import os
 from mylog import *
 
 
-logger = log_config(f_level=logging.DEBUG, c_level=logging.WARNING, log_file='log/log.txt')
-
-
 class Interface:
     '''
     接口类，通过http请求方法，url，请求参数来实例化。
@@ -46,6 +43,7 @@ class Interface:
     # 实例化方法
     def __init__(self, method, url, params, headers=None):
         # 基本属性
+        self.log = log_config()
         self.method = method
         self.url = url
         self.params = params
@@ -59,8 +57,6 @@ class Interface:
         
         # 接口下发后，响应结果对象
         self.result = None
-        
-        logger.info('create Interface instance %s' % self.url)
 
     # 参数修改
     def modify_params(self,k_v):
@@ -87,25 +83,25 @@ class Interface:
                             json=self.params, headers=self.headers)
             self.result = r
             assert(self.result.status_code == 200)
-            logger.info('Interface %s requested success!' % self.url)
-            logger.debug('Interface %s request and response info:' % self.url+'\n'+
+            self.log.info('Interface %s requested success!' % self.url)
+            self.log.info('Interface %s request and response info:' % self.url+'\n'+
                     '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+self.url+'\n'+
-                    str(self.result.request.headers)+'\n'+str(self.params)+'\n'+
-                    '响应:'+'\n'+'*'*60+'\n'+str(self.result.status_code)+'\n'+
-                    str(self.result.headers)+'\n'+str(self.result.json()))
+                    '头部\n'+str(self.result.request.headers)+'\n参数\n'+str(self.params)+'\n'+
+                    '响应:   '+str(self.result.status_code)+'\n'+'*'*60+'\n'+
+                    '头部\n'+str(self.result.headers)+'\n'+'参数\n'+str(self.result.json()))
             return True
         except Exception as e:
             self.result = None
-            logger.error('Interface %s requested failed!' % self.url + '\n' + str(e))
-            logger.debug('Interface %s request and response info:' % self.url+'\n'+
-                    '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+self.url+'\n'+
-                    str(self.headers)+'\n'+str(self.params))
+            self.log.error('Interface %s requested failed!' % self.url + '\n' + str(e))
+            self.log.info('Interface %s request and response info:' % self.url+'\n'+
+                    '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+self.url+'\n'+'头部\n'+
+                    str(self.headers)+'\n'+'参数\n'+str(self.params))
             return False
         
     # 响应结果校验
     def assert_response(self, k_v):
         if self.result == None:
-            logger.error(self.url+ '  request failed,assert operation is invailed!')
+            self.log.error('Request failed. Assert operation is invailed!')
             return False
         k_v = self.g_replace(k_v)
         for k in k_v:
@@ -120,11 +116,11 @@ class Interface:
                     obj = self.get_json(k)
                     o_obj = k_v[k]
                 assert(str(obj) == str(o_obj))
-                logger.info(self.url + '  Assert success!  '
-                            +k+':'+str(o_obj)+'|'+str(o_obj))
+                self.log.info('Assert success!  '
+                            +k+': '+str(o_obj)+' | '+str(o_obj))
             except:
-                logger.error(self.url + '  Assert failed!  '
-                             +k+':'+str(o_obj)+'|'+str(obj))
+                self.log.error('Assert failed!  '
+                             +k+' : '+str(o_obj)+' | '+str(obj))
                 return False
         return True
     
@@ -148,12 +144,12 @@ class Interface:
     def g_push(self, key_list):
         for k in key_list:
             Interface.g[k] = self.get_json(k)
-        logger.info(self.url + '  g push values: ' + 
+        self.log.info('G push values: ' + 
                 str([str(k)+':'+str(Interface.g[k]) for k in key_list]))
             
     # 删除过程值
     def g_pop(self, key_list):
-        logger.info(self.url + '  g pop values: ' + 
+        self.log.info('G pop values: ' + 
                 str([str(k)+':'+str(Interface.g[k]) for k in key_list]))
         for k in key_list:
             del Interface.g[k]

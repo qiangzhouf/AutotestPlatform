@@ -1,5 +1,6 @@
 import sqlite3
 from case import *
+from interface import *
 
 
 class Scene:
@@ -43,7 +44,7 @@ class Scene:
             c = Case(*elem)
             result.append(c.run())
             self.status.append(result[-1][1][0] and result[-1][1][1])
-        return self.name, result, all(self.status)
+        return self.name, result, 1 if all(self.status) else 0
     
     @classmethod
     def modify(cls, scene_params, case_params):

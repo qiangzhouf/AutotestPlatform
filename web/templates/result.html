@@ -1,12 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
+<script src="{{url_for('static', filename='result.js')}}"></script>
+
 <div class="row">
   <div class="col-md-1"></div>
   <div class="col-md-10">
-    <h3>测试报告</h3>
+    <h3>测试报告  <span class="glyphicon glyphicon-download-alt" style="color: rgb(150, 0, 0); font-size: 20px;"></span></h3>
   </div>
 </div>
-<br>
 
 <div class="row">
   <div class="col-md-1"></div>
@@ -18,7 +19,7 @@
 <div class="row">
   <div class="col-md-1"></div>
   <div style="padding:0px" class="col-md-10">
-    <table  class="table table table-hover" style="background:#FFF">
+    <table  class="table table table-condensed table-bordered" style="background:#FFF">
       <tr class="info">
     		<td><b>序号</b></td>
     		<td><b>场景名称</b></td>
@@ -26,70 +27,60 @@
     		<td><b>执行步数</b></td>
     		<td><b>操作</b></td>
       </tr>
-      {% for scene in scenes %}
+      {% for scene in result %}
       <tr>
         <td>{{loop.index}}</td>
-        <td>{{scene[1]}}</td>
+        <td>{{scene[0]}}</td>
         <td>
-            {% if scene[2] == 0 %}
-            <span class="glyphicon glyphicon-minus-sign" style="color: rgb(180, 180, 180); font-size: 30px;"></span>
-            {% elif scene[2] == 1 %}
-            <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 30px;"></span>
-            {% else %}
+            {% if scene[2] %}
             <span class="glyphicon glyphicon-ok-sign" style="color: rgb(0, 120, 0); font-size: 30px;"></span>
+            {% else %}
+            <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 30px;"></span>
             {% endif %}
         </td>
-        <td>{{scene[3]}}</td>
+        <td>{{scene[1]|length}}</td>
         <td>
-          <button type="button" class="btn btn-primary" data-toggle="collapse" data-target={{'#'+scene[1]}}>
+          <button type="button" class="btn btn-default" data-toggle="collapse" data-target={{'#'+scene[0]}}>
     	      详情
           </button>
         </td>
       </tr>
-      <tr class="collapse" id={{scene[1]}}><td colspan=5>
+      <tr class="collapse" id={{scene[0]}} style="background:#fcfcfc"><td colspan=5>
         <div class="row" >
-          <div class="col-md-12">
-            <table class="table table table-hover" style="background:#FFF">
-              <tr class="danger">
+            <div class="col-md-1"></div>
+          <div class="col-md-10">
+            <table class="table table table-condensed table-bordered" style="background:#fff">
+              <tr class="info">
             		<td><b>执行顺序</b></td>
             		<td><b>接口名称</b></td>
             		<td><b>请求结果</b></td>
                  <td><b>校验结果</b></td>
-            		<td><b>详细日志</b></td>
+                 <td><b>详细日志</b></td>
               </tr>
-              {% for case in cases[scene[1]] %}
+              {% for case in scene[1] %}
               <tr>
                 <td>{{loop.index}}</td>
-                <td>{{case[1]}}</td>
+                <td>{{case[0]}}</td>
                 <td>
-                    {% if case[2] == 0 %}
-                    <span class="glyphicon glyphicon-minus-sign" style="color: rgb(180, 180, 180); font-size: 20px;"></span>
-                    {% elif case[2] == 1 %}
-                    <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 20px;"></span>
-                    {% else %}
+                    {% if case[1][0] %}
                     <span class="glyphicon glyphicon-ok-sign" style="color: rgb(0, 120, 0); font-size: 20px;"></span>
+                    {% else %}
+                    <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 20px;"></span>
                     {% endif %}
                 </td>
                 <td>
-                    {% if case[3] == 0 %}
-                    <span class="glyphicon glyphicon-minus-sign" style="color: rgb(180, 180, 180); font-size: 20px;"></span>
-                    {% elif case[3] == 1 %}
-                    <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 20px;"></span>
-                    {% else %}
+                    {% if case[1][1] %}
                     <span class="glyphicon glyphicon-ok-sign" style="color: rgb(0, 120, 0); font-size: 20px;"></span>
+                    {% else %}
+                    <span class="glyphicon glyphicon-remove-sign" style="color: rgb(150, 0, 0); font-size: 20px;"></span>
                     {% endif %}
                 </td>
                 <td>
-                    <a data-toggle="collapse" data-target="{{'#'+scene[1]}}{{case[1]}}">日志</a>
+                    <a data-toggle="collapse" data-target="{{'#'+scene[0]}}{{case[0]}}" id="{{case[2]}}">日志</a>
                 </td>
               </tr>
-              {% if case[4] %}
-                <tr class="collapse" id="{{scene[1]}}{{case[1]}}"><td align="center" colspan="5">
-                    <div class="row">
-                    <img src="{{url_for('interf_log')}}?f={{case[4]}}" height="80%" width="80%">
-                    </div>
-                    <span style="color:#F00">{{case[4]}}</span>
-                </td></tr>
+              {% if case[2] %}
+                <tr class="collapse" id="{{scene[0]}}{{case[0]}}" ><td align="center" colspan="5"><textarea style="width:100%;height:300px"></textarea></td></tr>
               {% endif %}
               {% else %}
               <tr><td colspan="5">暂无接口</td></tr>

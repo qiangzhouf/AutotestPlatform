@@ -32,7 +32,7 @@ function refresh_task(){
                         else{
                             html += '<td style="width:15%"><button id="start" class="btn btn-success">启动</button>    '
                         };
-                       html += '<button id="del" class="btn btn-danger">删除</button>    <button id="detail" class="btn btn-primary">详情</button></td>'; 
+                       html += '<button id="del" class="btn btn-danger">删除</button>    <button id="detail" type="submit" class="btn btn-primary">详情</button></td>'; 
                     }
                     else{
                         if (j==7 || j==8){
@@ -146,6 +146,12 @@ $(function(){
                 tc('提示', '任务启动失败')
             };
         });
+    });
+    
+    //查看任务详情
+    $('table#task').on('click', 'button#detail', function(){
+        var name = $(this).parents('tr').find('td').eq(1).text();
+        window.open('http://' + document.domain + ':' + location.port + '/task_detail?name='+name+'&project='+$('select#project').val());
     });
     
 });

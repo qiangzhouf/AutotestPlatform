@@ -831,7 +831,7 @@ def interf_task():
             g.db.commit()
             return jsonify(code=200, message="任务删除成功！")
         elif request.form['type'] == 'start_task':
-            g.db.execute('update interf_task set run_time="%s",progress="0",pass_num=0,pass_rate="0",status=1 where name="%s" and project="%s";' % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),request.form['name'],request.form['project']))
+            g.db.execute('update interf_task set run_time="%s",progress="0",pass_num=0,pass_rate="0",status=1,result="[]" where name="%s" and project="%s";' % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),request.form['name'],request.form['project']))
             g.db.commit()
             t = Task(request.form['name'],request.form['project'])
             t.run()
@@ -871,4 +871,16 @@ def refresh_task_i():
         else:
             socketio.emit('task_data', {'msg': 'ok'}, namespace='/task_i')
             
-        
+            
+@app.route('/task_detail', methods=['GET'])
+def task_detail():
+    result = json.loads(g.db.execute('select result from interf_task where name="%s" and project="%s";' % (request.args['name'], request.args['project'])).fetchall()[0][0])
+    return render_template('result.html', result=result)
+            
+            
+
+@app.route('/interf_log', methods=['POST'])
+def interf_log():
+    with open(request.form['logfile'], 'r') as f:
+        log_ = f.read()
+    return jsonify(log=log_)

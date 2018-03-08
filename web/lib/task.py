@@ -37,6 +37,9 @@ class Task:
                 num += 1
                 rate = int(num/self.total*100)
                 self.db('update interf_task set pass_num="%d", pass_rate="%d" where name="%s" and project="%s";' % (num, rate, self.name, self.project))
+            r_data = json.loads(self.db('select result from interf_task where name="%s" and project="%s";' % (self.name, self.project))[0][0])
+            r_data.append(r)
+            self.db("update interf_task set result='%s' where name='%s' and project='%s';" % (json.dumps(r_data), self.name, self.project))
             count += 1
             pro = int(count/self.total*100)
             self.db('update interf_task set progress="%d" where name="%s" and project="%s";' % (pro, self.name, self.project))

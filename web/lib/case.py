@@ -1,8 +1,9 @@
-from interface import *
 import mylog
 import uuid
 import time
 import json
+import logging
+from interface import *
 
 
 class Case:
@@ -21,6 +22,8 @@ class Case:
         
     '''
     
+    fh = logging.FileHandler('log/'+str(uuid.uuid1())+'_log.txt', mode='w')
+    
     def __init__(self, project, name, data=None, assert_data=None, 
                  save_data=None, del_data=None, pre_time=0):
         self.name = name
@@ -33,8 +36,18 @@ class Case:
         self.pre_time = pre_time
         
     def run(self):
+        # 日志配置
+        try:
+            self.interface.log.removeHandler(Case.fh)
+        except:
+            pass
         log_file = 'log/'+str(uuid.uuid1())+'_log.txt'
-        logger = mylog.log_config(log_file=log_file)
+        fh = logging.FileHandler(log_file, mode='w')
+        formatter = logging.Formatter('[%(levelname)s] - [%(asctime)s] - %(filename)s\n%(message)s\n') 
+        fh.setFormatter(formatter)
+        fh.setLevel(logging.INFO)
+        self.interface.log.addHandler(fh)
+        Case.fh = fh
         
         if self.pre_time:
             time.sleep(self.pre_time)
