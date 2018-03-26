@@ -884,3 +884,28 @@ def interf_log():
     with open(request.form['logfile'], 'r') as f:
         log_ = f.read()
     return jsonify(log=log_)
+
+
+@app.route('/project_m', methods=['GET', 'POST'])
+def project_m():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    if request.method == 'GET':
+        project = [elem[0] for elem in g.db.execute('select name from project;').fetchall()]
+        return render_template('project_m.html', projects=project)
+    elif request.method == 'POST':
+        project = request.form['project']
+        if request.form['type'] == 'add':
+            if (project,) in g.db.execute('select name from project;').fetchall():
+                return jsonify({'code':201, 'msg':'项目名重复'})
+            else:
+                g.db.execute('insert into project (name) values("%s")' % project)
+                g.db.commit()
+                return jsonify(code=200)
+        elif request.form['type'] == 'del':
+            try:
+                g.db.execute('delete from project where name="%s";' % project)
+                g.db.commit()
+                return jsonify(code=200)
+            except Exception as e:
+                return jsonify(code=201, msg=e)

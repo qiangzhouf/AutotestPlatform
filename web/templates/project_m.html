@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{url_for('static', filename='project_m.js')}}"></script>
+
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-3"><h3>项目管理</h3></div>
+</div>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-3" style="background:#FFF;border-radius:10px;">
+    <div class="row" style="height:20px;"></div>
+    <form class="form-inline">
+      <div class="form-group">
+        <label>项目名:</label>
+        <input type="text" class="form-control" placeholder="项目名不能重复" id="project_name">
+      </div>
+          <button class="btn btn-primary" id="new_project" type="button">新 增</button>
+        <button id="send_alert" class="btn btn-lg" data-toggle="modal" data-target="#myModal" type="button" style="display:none"></button>
+    </form>
+    <div class="row" style="height:20px;"></div>
+  </div>
+</div>
+<br>
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-3" style="padding: 0px">
+        <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;">
+            <tr id="project_t" class="info">
+                <td><b>项目名</b></td>
+                <td><b>操作</b></td></tr>
+                {% for elem in projects %}
+                <tr>
+                    <td>{{elem}}</td>
+                    <td align='center'>
+                        <button class="btn btn-danger" id="delete">删除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}
