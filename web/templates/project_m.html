@@ -24,15 +24,20 @@
 <br>
 <div class="row">
     <div class="col-md-1"></div>
-    <div class="col-md-3" style="padding: 0px">
+    <div class="col-md-7" style="padding: 0px">
         <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;">
             <tr id="project_t" class="info">
                 <td><b>项目名</b></td>
+                <td><b>执行机</b></td>
+                <td><b>登陆账户</b></td>
                 <td><b>操作</b></td></tr>
                 {% for elem in projects %}
                 <tr>
-                    <td>{{elem}}</td>
+                    <td>{{elem[0]}}</td>
+                    <td><input value="{{elem[1]}}"></input></td>
+                    <td><input value="{{elem[2]}}"></input></td>
                     <td align='center'>
+                        <button class="btn btn-primary" id="modify">修改</button>
                         <button class="btn btn-danger" id="delete">删除</button>
                     </td>
                 </tr>

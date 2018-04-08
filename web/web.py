@@ -590,10 +590,7 @@ def api_test():
     else:
         req_headers = json.loads(request.form['headers'])
    
-    if project_name == '车综平台':
-        if not Interface.cookie:
-            set_cookie('公共-用户-用户登录', '车综平台')
-        req_headers['Cookie'] = Interface.cookie
+    req_headers['Cookie'] = Interface.cookie
         
     if req_method == 'GET':
         if req_auth == '"none"':
@@ -677,6 +674,14 @@ def project_api():
         if request.form['type'] == 'list':
             api_list = [elem[0] for elem in g.db.execute('select name from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()]
             return jsonify(api_list=api_list)
+        
+        # 刷新cookie ，设置host
+        Interface.host = g.db.execute('select host from project where name="%s"' % request.form['project_name']).fetchall()[0][0]
+        user_passwd = g.db.execute('select user_passwd from project where name="%s"' % request.form['project_name']).fetchall()[0][0]
+        if user_passwd:
+            user_passwd = json.loads(user_passwd)
+        set_cookie('公共-用户-用户登录', request.form['project_name'], user_passwd)
+        
         api_list = g.db.execute('select * from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()
         tmp = {}
         for elem in api_list:
@@ -891,7 +896,7 @@ def project_m():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     if request.method == 'GET':
-        project = [elem[0] for elem in g.db.execute('select name from project;').fetchall()]
+        project = g.db.execute('select name,host,user_passwd from project;').fetchall()
         return render_template('project_m.html', projects=project)
     elif request.method == 'POST':
         project = request.form['project']
@@ -905,6 +910,13 @@ def project_m():
         elif request.form['type'] == 'del':
             try:
                 g.db.execute('delete from project where name="%s";' % project)
+                g.db.commit()
+                return jsonify(code=200)
+            except Exception as e:
+                return jsonify(code=201, msg=e)
+        elif request.form['type'] == 'mod':
+            try:
+                g.db.execute("update project set host='%s',user_passwd='%s' where name='%s';" % (request.form['host'], request.form['user_passwd'], project))
                 g.db.commit()
                 return jsonify(code=200)
             except Exception as e:

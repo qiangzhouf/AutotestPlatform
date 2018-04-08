@@ -2,6 +2,7 @@ from scene import *
 import sqlite3
 import threading
 from interface import *
+import json
 
 
 class Task:
@@ -16,6 +17,7 @@ class Task:
         self.project = project
         self.suite = self.get_suite(task_name, project)
         self.total = len(self.suite)
+        Interface.host = self.db('select host from project where name="%s"' % (project))[0][0]
         
     def get_suite(self, task_name, project):
         suite = self.db('select suite from interf_task where name="%s" and project="%s"' % (task_name, project))[0][0]
@@ -27,7 +29,10 @@ class Task:
         t.start()
         
     def task(self):
-        set_cookie('公共-用户-用户登录', self.project)
+        user_passwd = self.db('select user_passwd from project where name="%s"' % (self.project))[0][0]
+        if user_passwd:
+            user_passwd = json.loads(user_passwd)
+        set_cookie('公共-用户-用户登录', self.project, user_passwd)
         count=0
         for elem in self.suite:
             s = Scene(elem, self.project)
