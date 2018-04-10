@@ -680,7 +680,10 @@ def project_api():
         user_passwd = g.db.execute('select user_passwd from project where name="%s"' % request.form['project_name']).fetchall()[0][0]
         if user_passwd:
             user_passwd = json.loads(user_passwd)
-        set_cookie('公共-用户-用户登录', request.form['project_name'], user_passwd)
+        try:
+            set_cookie('公共-用户-用户登录', request.form['project_name'], user_passwd)
+        except:
+            print('cookie设置失败')
         
         api_list = g.db.execute('select * from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()
         tmp = {}

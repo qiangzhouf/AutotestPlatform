@@ -34,7 +34,7 @@ class Interface:
     '''
     
     # 类变量
-    host = '192.168.2.54:8088'
+    host = ''
     db_path = 'web.db'
     cookie = None
     protocol = 'http://'# https://
@@ -62,8 +62,10 @@ class Interface:
     def modify_params(self,k_v):
         Interface.dynamic_params(k_v)
         k_v = self.g_replace(k_v)
+        '''
         for k in self.params:
             self.params[k] = ''
+       '''
         for k in k_v:
             if isinstance(k_v[k], str):
                 if '*base64.' in k_v[k]:
@@ -85,7 +87,7 @@ class Interface:
             assert(self.result.status_code == 200)
             self.log.info('Interface %s requested success!' % self.url)
             self.log.info('Interface %s request and response info:' % self.url+'\n'+
-                    '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+self.url+'\n'+
+                    '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+Interface.host+' '+self.url+'\n'+
                     '头部\n'+str(self.result.request.headers)+'\n参数\n'+str(self.params)+'\n'+
                     '响应:   '+str(self.result.status_code)+'\n'+'*'*60+'\n'+
                     '头部\n'+str(self.result.headers)+'\n'+'参数\n'+str(self.result.json()))
@@ -94,7 +96,7 @@ class Interface:
             self.result = None
             self.log.error('Interface %s requested failed!' % self.url + '\n' + str(e))
             self.log.info('Interface %s request and response info:' % self.url+'\n'+
-                    '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+self.url+'\n'+'头部\n'+
+                    '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+Interface.host+' '+self.url+'\n'+'头部\n'+
                     str(self.headers)+'\n'+'参数\n'+str(self.params))
             return False
         
@@ -196,8 +198,10 @@ class Interface:
 
 
 # 登陆获取cookie，并保存到Interfa的类变量中
-def set_cookie(interface_name, project):
+def set_cookie(interface_name, project, data=None):
     i = interf(interface_name, project)
+    if data:
+        i.modify_params(data)
     i.request()
     Interface.cookie = i.result.headers['Set-Cookie'].split(';')[0]
     
