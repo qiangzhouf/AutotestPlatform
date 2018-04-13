@@ -9,7 +9,7 @@ function refresh_task(){
                 html += '<tr class="dam">';
                 for (j=0;j<11;j++){
                     if (j==0){
-                        html = html + '<td style="width:5%">'+i+'</td>';
+                        html = html + '<td style="width:5%">'+(i+1)+'</td>';
                     }
                     else if (j==5){
                         if (data.task[i][j]==0){
@@ -23,14 +23,23 @@ function refresh_task(){
                         }
                     }
                     else if (j==6){
-                        html = html + '<td style="width:15%"><div class="progress progress-striped active"><div class="progress-bar" style="width: ' + data.task[i][j] + '%;">' + data.task[i][j] + '%' + '</div></div></td>'
+                        var obj = parseInt((data.task[i][j]/data.task[i][7])*100);
+                        if ((obj-data.task[i][9])==0){
+                            html = html + '<td style="width:10%"><div class="progress progress-striped active"><div class="progress-bar" style="width: ' + obj + '%;">' + obj + '%' + '</div></div></td>'
+                        }
+                        else if ((obj-data.task[i][9])<=50){
+                            html = html + '<td style="width:10%"><div class="progress progress-striped active"><div class="progress-bar progress-bar-warning" style="width: ' + obj + '%;">' + obj + '%' + '</div></div></td>'     
+                        }
+                        else {
+                            html = html + '<td style="width:10%"><div class="progress progress-striped active"><div class="progress-bar progress-bar-danger" style="width: ' + obj + '%;">' + obj + '%' + '</div></div></td>'     
+                        }
                     }
                     else if (j==10){
                         if (data.task[i][5]==1){
-                            html += '<td style="width:15%"><button id="start" class="btn btn-success" disabled="disabled">启动</button>    '
+                            html += '<td style="width:20%"><button id="start" class="btn btn-success" disabled="disabled">启动</button>    '
                         }
                         else{
-                            html += '<td style="width:15%"><button id="start" class="btn btn-success">启动</button>    '
+                            html += '<td style="width:20%"><button id="start" class="btn btn-success">启动</button>    '
                         };
                        html += '<button id="del" class="btn btn-danger">删除</button>    <button id="detail" type="submit" class="btn btn-primary">详情</button></td>'; 
                     }
@@ -92,6 +101,9 @@ $(function(){
             $('div#suite_data').hide();
         };
     });
+    
+    $('select#project').get(0).selectedIndex=1
+    $("select#project").trigger("change"); 
     
     //新建任务
     $('button#new_task').on('click', function(){

@@ -1,5 +1,6 @@
 //页面加载时运行
 $(function(){
+    
     //选择项目后，动态加载项目下的所有场景用例
     $('select#project').change(function(){
         if ($(this).val() != 'none'){
@@ -13,10 +14,22 @@ $(function(){
                 for (i=0;i<data.scene.length;i++){
                     html = html + '<option value="' + data.scene[i] + '">' + data.scene[i] + '</option>';   
                 };
+                select.html(html);
+                
+                var select = $('select#scene_copy');
+                select.empty()
+                var html = '<option value="none">请选择场景</option>'
+                for (i=0;i<data.scene.length;i++){
+                    html = html + '<option value="' + data.scene[i] + '">' + data.scene[i] + '</option>';   
+                };
                 select.html(html)
+                
             });
         };
     });
+    
+    $('select#project').get(0).selectedIndex=1
+    $("select#project").trigger("change");  
     
     //选择场景后，加载场景参数
     $('select#scene').change(function(){
@@ -28,10 +41,51 @@ $(function(){
                 type: 'get_scene_data'
             }, function(data){
                 $('tr.dam').remove()
+                for (i=0;i<data.cases.length;i++){
+                    var tr = $('table').find('tr').last()
+                    var html = ''
+                    html = html + '<tr style="height:200px" class="dam"><td  style="width:5%">' + (i+1) + '</td>'
+                    for (j=0;j<6;j++){
+                        if (j==1 || j==2){
+                            if (data.cases[i][j]==''){
+                                var tmp = ''
+                            }
+                            else{
+                                try{var tmp = JSON.stringify(JSON.parse(data.cases[i][j]),null,4)}
+                                catch(err){var tmp = data.cases[i][j]};
+                                    
+                            };
+                            html = html + '<td style="width:20%;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px">' + tmp + '</textarea></td>';
+                        }
+                        else if (j==6){
+                            html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}
+                        else{html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}; 
+                    };
+                    html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
+                tr.after(html)
+                };
+                //tr.after()
+            });
+        }
+        else{
+            $('div#sence_data').hide()
+        };
+    });
+    
+    //场景复制
+    $('select#scene_copy').change(function(){
+        if ($(this).val() != 'none'){
+            $('div#sence_data').show()
+            $.post('/interf_scene', {
+                project: $('select#project').val(),
+                scene: $(this).val(),
+                type: 'get_scene_data'
+            }, function(data){
+                $('tr.dam').remove()
                 var tr = $('tr#case_params')
                 var html = ''
                 for (i=0;i<data.cases.length;i++){
-                    html = html + '<tr style="height:200px" class="dam"><td  style="width:10%">' + (i+1) + '</td>'
+                    html = html + '<tr style="height:200px" class="dam"><td  style="width:5%">' + (i+1) + '</td>'
                     for (j=0;j<6;j++){
                         if (j==1 || j==2){
                             if (data.cases[i][j]==''){
@@ -40,11 +94,13 @@ $(function(){
                             else{
                               var tmp = JSON.stringify(JSON.parse(data.cases[i][j]),null,4)
                             };
-                            html = html + '<td style="width:20%;overflow: hidden" class="dam"><textarea class="dam" style="width:100%;height:200px">' + tmp + '</textarea></td>';
+                            html = html + '<td style="width:20%;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px">' + tmp + '</textarea></td>';
                         }
-                        else{html = html + '<td style="width:10%;margin: 80px 0px;overflow: hidden" class="dam">' + data.cases[i][j] + '</td>'}; 
+                        else if (j==6){
+                            html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}
+                        else{html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}; 
                     };
-                    html = html + '<td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button></td></tr>';
+                    html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
                 };
                 tr.after(html)
             });
@@ -113,13 +169,32 @@ $(function(){
     //新增接口
     $('table').on('click', 'button#n', function(){
         var trs = $(this).parents('table').find('tr')
-        var html = '<tr style="height:200px" class="dam"><td  style="width:10%">'+trs.length+'</td>'
+        var html = '<tr style="height:200px" class="dam"><td  style="width:5%">'+trs.length+'</td>'
         for (i=0;i<6;i++){
-            if (i==1 || i==2){html += '<td style="width:20%;overflow: hidden" class="dam"><textarea class="dam" style="width:100%;height:200px"></textarea></td>'}
-            else{html += '<td style="width:10%;overflow: hidden" class="dam"></td>'}
+            if (i==1 || i==2){html += '<td style="width:20%;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px"></textarea></td>'}
+            else if (j==6){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
+            else{html += '<td style="width:10%;word-wrap:break-word;" class="dam"></td>'}
         };
-        html += '<td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button></td></tr>';
+        html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
         trs.last().after(html);
+    });
+    
+    //上方新增接口
+    $('table').on('click', 'button#ld', function(){
+        var tr = $(this).parents('tr')
+        var html = '<tr style="height:200px" class="dam"><td  style="width:10%"></td>'
+        for (i=0;i<6;i++){
+            if (i==1 || i==2){html += '<td style="width:20%;o;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px"></textarea></td>'}
+            else if (j==6){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
+            else{html += '<td style="width:10%;word-wrap:break-word;" class="dam"></td>'}
+        };
+        html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
+        tr.before(html);
+        //刷新序号
+        trs = $('table').find('tr');
+        for (var i=1;i<trs.length;i++){
+            trs.eq(i).find('td').first().text(i);
+        }
     });
     
     //接口名选择时，动态加载可选参数和可检验参数
@@ -187,7 +262,7 @@ $(function(){
     $('button#zmd').on('click', function(){
         var trs = $('div#sence_data').find('tr.dam');
         var data = [];
-        var case_data = {};
+        var case_data = [];
         for (i=0;i<trs.length;i++){
             var tds = trs.eq(i).find('td.dam');
             var case_ = []
@@ -198,13 +273,13 @@ $(function(){
                     key = case_[j] 
                 }
                 else if (j==1 || j==2){
-                    case_[j] = tds.eq(j).find('textarea').val().replace(/\n/g, '').replace(/ /g, '');
+                    case_[j] = tds.eq(j).find('textarea').val().replace(/\n/g, '');
                 }
                 else{
                     case_[j] = tds.eq(j).text().replace(/\n/g, '').replace(/ /g, '');
                 };
             };
-            case_data[key] = case_;
+            case_data[i] = case_;
             data[i] = key;
         };
         $.post('/interf_scene', {'type': 'modify', 'data': JSON.stringify(data), 'case_data': JSON.stringify(case_data), 'project': $('select#project').val(), 'scene': $('select#scene').val()}, function(data){
@@ -212,5 +287,39 @@ $(function(){
             $("div.modal-body").text(data.message);
             $("button#send_alert").trigger("click");
         });
+    });
+    
+    // 删除场景
+    $('button#del_scene').on('click', function(){
+        var name = $('select#scene').val();
+        if (name=='none'){
+            $("h4#myModalLabel").text("提示");
+            $("div.modal-body").text('未选择要删除的场景');
+            $("button#send_alert").trigger("click");
+            return
+        }
+        else{
+            $.post('/interf_scene', {'type': 'del_scene', 'project': $('select#project').val(), 'scene': name}, function(data){
+                $("h4#myModalLabel").text("提示");
+                $("div.modal-body").text(data.message);
+                $("button#send_alert").trigger("click");
+                if (data.message=='删除成功'){
+                    $('select#scene').val('none');
+                    $('div#sence_data').hide();
+                    $("select#scene option[value='"+name+"']").remove();
+                }
+            });
+        }
+    });
+    
+    // 文本框修改时，触发json校验
+    $('table').on('blur', 'textarea', function(){
+        try{
+            JSON.parse($(this).val());
+            $(this).attr('style', $(this).attr('style').replace(/background-color:#FFB5C5;/g, ''))
+        }
+        catch(err){
+            $(this).attr('style', 'background-color:#FFB5C5;'+$(this).attr('style'))
+    }
     });
 });

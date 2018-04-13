@@ -6,6 +6,7 @@ import socket
 import time
 import platform
 import signal
+import uuid
 import shutil
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, Response, jsonify
 from contextlib import closing
@@ -33,6 +34,12 @@ thread_lock = Lock()
 push_list = []
 # 自动化任务
 handle = {}
+# 数据库初始化
+c = sqlite3.connect('web.db')
+c.execute('update interf_task set status=2;')
+c.execute('update push set status=0, conn_num=0;')
+c.commit()
+c.close()
 
 
 # 创建app
@@ -218,10 +225,13 @@ def teardown_request(exception):
 def show_tasks():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
+    return redirect(url_for('api_record'))
+    '''
+    暂时重定向到接口测试页面，UI自动化不开启
     tasks = g.db.execute('select * from tasks order by id desc').fetchall()
     case_sets = g.db.execute('select name from case_set order by id desc').fetchall()
     return render_template('show_tasks.html', task=tasks, case_set=case_sets)
-
+    '''
 
 # 登陆
 @app.route('/login', methods=['GET', 'POST'])
@@ -590,78 +600,106 @@ def api_test():
     else:
         req_headers = json.loads(request.form['headers'])
    
-    req_headers['Cookie'] = Interface.cookie
-        
-    if req_method == 'GET':
-        if req_auth == '"none"':
-            t = time.time()
-            req = requests.get(req_url, params=req_data, headers=req_headers)
-            print('\n', "\033[1;32;40m%s\033[0m" % '[GET]', req.url)
-            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-        else:
-            req_auth = json.loads(req_auth)
-            if req_auth['auth_method'] == 'Basic':
-                t = time.time()
-                req = requests.get(req_url, params=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-            elif req_auth['auth_method'] == 'Digst':
-                t = time.time()
-                req = requests.get(req_url,params=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-    elif req_method == 'POST':
-        if req_auth == '"none"':
-            t = time.time()
-            req = requests.post(req_url, json=req_data, headers=req_headers)
-            print('\n', "\033[1;32;40m%s\033[0m" % '[POST]', req.url, req_data)
-            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-        else:
-            req_auth = json.loads(req_auth)
-            if req_auth['auth_method'] == 'Basic':
-                t = time.time()
-                req = requests.post(req_url, json=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-            elif req_auth['auth_method'] == 'Digst':
-                t = time.time()
-                req = requests.post(req_url, json=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-    elif req_method == 'PUT':
-        if req_auth == '"none"':
-            t = time.time()
-            req = requests.put(req_url, json=req_data, headers=req_headers)
-            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-        else:
-            req_auth = json.loads(req_auth)
-            if req_auth['auth_method'] == 'Basic':
-                t = time.time()
-                req = requests.put(req_url, json=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-            elif req_auth['auth_method'] == 'Digst':
-                t = time.time()
-                req = requests.put(req_url, json=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-    elif req_method == 'DELETE':
-        if req_auth == '"none"':
-            t = time.time()
-            req = requests.delete(req_url, headers=req_headers)
-            delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-        else:
-            req_auth = json.loads(req_auth)
-            if req_auth['auth_method'] == 'Basic':
-                t = time.time()
-                req = requests.delete(req_url, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-            elif req_auth['auth_method'] == 'Digst':
-                t = time.time()
-                req = requests.delete(req_url, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
-                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
-    
-    res_headers = dict(req.headers)
-    res_status_code = req.status_code
+    # 刷新cookie
+    Interface.host = req_host.split(':')[0]
+    user_passwd = g.db.execute('select user_passwd from project where name="%s"' % project_name).fetchall()[0][0]
+    if user_passwd:
+        user_passwd = json.loads(user_passwd)
     try:
-        res_data = req.json()
+        r = set_cookie('公共-用户-用户登录', project_name, user_passwd)
+        #print('cookie设置成功',project_name,r,Interface.cookie)
     except:
-        res_data = str(req.text)
-    res_time = delt_t
+        #print('cookie设置失败',project_name,r,Interface.cookie)
+        pass
+    req_headers['Cookie'] = Interface.cookie
+    
+    try:
+        if req_method == 'GET':
+            if req_auth == '"none"':
+                t = time.time()
+                req = requests.get(req_url, params=req_data, headers=req_headers)
+                print('\n', "\033[1;32;40m%s\033[0m" % '[GET]', req.url)
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            else:
+                req_auth = json.loads(req_auth)
+                if req_auth['auth_method'] == 'Basic':
+                    t = time.time()
+                    req = requests.get(req_url, params=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+                elif req_auth['auth_method'] == 'Digst':
+                    t = time.time()
+                    req = requests.get(req_url,params=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        elif req_method == 'POST':
+            if req_auth == '"none"':
+                files = {}
+                for key in req_data:
+                    if isinstance(req_data[key], str):
+                        if '*file.' in req_data[key]:
+                            tmp = req_data[key].replace('*file.', '')
+                            files[key] = (str(uuid.uuid1())+tmp.split('.')[-1], open('image/'+tmp, 'rb'))
+                for key in files:
+                    del req_data[key]
+                t = time.time()
+                if files != {}:
+                    req = requests.post(req_url, params=req_data, files=files, headers=req_headers)   
+                else:
+                    req = requests.post(req_url, json=req_data, headers=req_headers)
+                print('\n', "\033[1;32;40m%s\033[0m" % '[POST]', req.url, req_data)
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            else:
+                req_auth = json.loads(req_auth)
+                if req_auth['auth_method'] == 'Basic':
+                    t = time.time()
+                    req = requests.post(req_url, json=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+                elif req_auth['auth_method'] == 'Digst':
+                    t = time.time()
+                    req = requests.post(req_url, json=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        elif req_method == 'PUT':
+            if req_auth == '"none"':
+                t = time.time()
+                req = requests.put(req_url, json=req_data, headers=req_headers)
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            else:
+                req_auth = json.loads(req_auth)
+                if req_auth['auth_method'] == 'Basic':
+                    t = time.time()
+                    req = requests.put(req_url, json=req_data, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+                elif req_auth['auth_method'] == 'Digst':
+                    t = time.time()
+                    req = requests.put(req_url, json=req_data, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        elif req_method == 'DELETE':
+            if req_auth == '"none"':
+                t = time.time()
+                req = requests.delete(req_url, headers=req_headers)
+                delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+            else:
+                req_auth = json.loads(req_auth)
+                if req_auth['auth_method'] == 'Basic':
+                    t = time.time()
+                    req = requests.delete(req_url, headers=req_headers, auth=HTTPBasicAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+                elif req_auth['auth_method'] == 'Digst':
+                    t = time.time()
+                    req = requests.delete(req_url, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
+                    delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        res_headers = dict(req.headers)
+        res_status_code = req.status_code
+        try:
+            res_data = req.json()
+        except:
+            res_data = str(req.text)
+        res_time = delt_t
+    except Exception as e:
+        print(repr(e))
+        res_status_code = 500
+        res_time = 0
+        res_data = {}
+        res_headers = {}
     return jsonify({'status_code': res_status_code, 'request_time': res_time, 'response': res_data, 'res_h': res_headers, 'request': req_data})
 
 
@@ -674,16 +712,6 @@ def project_api():
         if request.form['type'] == 'list':
             api_list = [elem[0] for elem in g.db.execute('select name from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()]
             return jsonify(api_list=api_list)
-        
-        # 刷新cookie ，设置host
-        Interface.host = g.db.execute('select host from project where name="%s"' % request.form['project_name']).fetchall()[0][0]
-        user_passwd = g.db.execute('select user_passwd from project where name="%s"' % request.form['project_name']).fetchall()[0][0]
-        if user_passwd:
-            user_passwd = json.loads(user_passwd)
-        try:
-            set_cookie('公共-用户-用户登录', request.form['project_name'], user_passwd)
-        except:
-            print('cookie设置失败')
         
         api_list = g.db.execute('select * from api where project_name="%s" order by name;' % request.form['project_name']).fetchall()
         tmp = {}
@@ -708,7 +736,15 @@ def project_api():
         for key in assert_data:
             assert_data[key] = assert_data[key]['assert_value']
         return jsonify(data=data, assert_data=assert_data)
-
+    elif request.form['get'] == 'del':
+        try:
+            g.db.execute('delete from api where name="%s" and project_name="%s";' % (request.form['api_name'], request.form['project_name']))
+            g.db.commit()
+            return jsonify(msg='删除成功')
+        except Exception as e:
+            return jsonify(msg='删除失败'+repr(e))
+        
+        
 @app.route('/api_save', methods=['POST'])
 def api_save():
     pak = request.form['pak']
@@ -765,8 +801,8 @@ def interf_scene():
                 data = data.split(',')
             s_key = g.db.execute('select id from scene where name="%s" and project="%s";' % (scene, project)).fetchall()[0][0]
             cases = []
-            for elem in data:
-                cases.append(g.db.execute('select name,data,assert_data,save_data,del_data,pre_time from "case" where name="%s" and s_key="%s"' % (elem, s_key)).fetchall()[0])
+            for k,v in enumerate(data):
+                cases.append(g.db.execute('select name,data,assert_data,save_data,del_data,pre_time from "case" where name="%s" and s_key="%s"' % (v, s_key)).fetchall()[data[:k].count(v)])
             return jsonify(cases=cases)
         elif request.form['type'] == 'new':
             if (request.form['name'],) in g.db.execute('select name from scene where project="%s";' % (request.form['project'])).fetchall():
@@ -781,6 +817,20 @@ def interf_scene():
             name = request.form['scene']
             Scene.modify([project, name, api_list], api_data)
             return jsonify(code=200, message='场景《%s》修改成功' % name)
+        elif request.form['type'] == 'del_scene':
+            try:
+                # 删除场景
+                g.db.execute('delete from scene where project="%s" and name="%s"' % (request.form['project'], request.form['scene']))
+                # 删除测试套中包含的该场景
+                for elem in g.db.execute('select id,data from suite where project="%s";' % request.form['project']).fetchall():
+                    if elem[1] is None:
+                        continue
+                    if request.form['scene'] in elem[1]:
+                        g.db.execute('update suite set data="%s" where id=%d;' % (elem[1].replace(request.form['scene']+',', '').replace(request.form['scene'], ''), elem[0]))
+                g.db.commit()
+                return jsonify(message='删除成功')
+            except Exception as e:
+                return jsonify(message='删除失败'+e)
         scene = [elem[0] for elem in g.db.execute('select name from scene where project="%s";' % project).fetchall()]
         return jsonify(scene=scene)
     
@@ -811,6 +861,26 @@ def suite():
             g.db.execute('update suite set data="%s" where name="%s" and project="%s"' % (scene_data, request.form['name'], request.form['project']))
             g.db.commit()
             return jsonify(code=200, message="测试套《%s》修改成功！" % request.form['name'])
+        elif request.form['type'] == 'del_suite':
+            try:
+                if (request.form['suite'],) in g.db.execute('select suite from interf_task;').fetchall():
+                    return jsonify(msg="删除失败，测试套已被加载到任务，请先删除任务后再执行该操作！")
+                else:
+                    g.db.execute('delete from suite where name="%s" and project="%s";' % (request.form['suite'], request.form['project']))
+                    g.db.commit()
+                    return jsonify(msg="删除成功")
+            except Exception as e:
+                return jsonify(msg="Error:"+repr(e))
+        elif request.form['type'] == 'new_suite':
+            try:
+                if (request.form['suite'],) in g.db.execute('select name from suite;').fetchall():
+                    return jsonify(msg="测试套名称重复，请重新输入！")
+                else:
+                    g.db.execute('insert into suite(name,project) values("%s","%s");' % (request.form['suite'], request.form['project']))
+                    g.db.commit()
+                    return jsonify(msg="新增测试套成功")
+            except Exception as e:
+                return jsonify(msg="Error:"+repr(e))
      
     
 @app.route('/interf_task', methods=['GET', 'POST'])
@@ -835,12 +905,48 @@ def interf_task():
             g.db.commit()
             return jsonify(code=200)
         elif request.form['type'] == 'del_task':
+            try:
+                log_file = json.loads(g.db.execute('select result from interf_task where name="%s" and project="%s";' %(request.form['name'], request.form['project'])).fetchall()[0][0])
+                log_file_list = []
+                for elem in log_file:
+                    for i in elem[1]:
+                        log_file_list.append(i[2])
+            except:
+                log_file_list = []
             g.db.execute('delete from interf_task where name="%s" and project="%s";' % (request.form['name'], request.form['project']))
             g.db.commit()
+            # 删除任务日志
+            for elem in log_file_list:
+                try:
+                    os.remove(elem)
+                except:
+                    pass
+            
             return jsonify(code=200, message="任务删除成功！")
+        # 启动任务
         elif request.form['type'] == 'start_task':
-            g.db.execute('update interf_task set run_time="%s",progress="0",pass_num=0,pass_rate="0",status=1,result="[]" where name="%s" and project="%s";' % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),request.form['name'],request.form['project']))
+            # 同步测试套数量
+            suite_name = g.db.execute('select suite from interf_task where name="%s" and project="%s";' %(request.form['name'], request.form['project'])).fetchall()[0][0]
+            scene_num = len(g.db.execute('select data from suite where name="%s" and project="%s";' %(suite_name, request.form['project'])).fetchall()[0][0].split(','))
+            try:
+                log_file = json.loads(g.db.execute('select result from interf_task where name="%s" and project="%s";' %(request.form['name'], request.form['project'])).fetchall()[0][0])
+                log_file_list = []
+                for elem in log_file:
+                    for i in elem[1]:
+                        log_file_list.append(i[2])
+            except:
+                log_file_list = []
+            
+            # 初始化任务数据
+            g.db.execute('update interf_task set run_time="%s",progress="0",scene_num=%s,pass_num=0,pass_rate="0",status=1,result="[]" where name="%s" and project="%s";' % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),scene_num,request.form['name'],request.form['project']))
             g.db.commit()
+                
+            # 删掉之前的任务日志
+            for elem in log_file_list:
+                try:
+                    os.remove(elem)
+                except:
+                    pass
             t = Task(request.form['name'],request.form['project'])
             t.run()
             return jsonify(code=200)
@@ -848,36 +954,39 @@ def interf_task():
         
 @socketio.on('connect', namespace='/task_i')
 def push_task_i():
-    s = connect_db()
-    conn_num = s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0]+1
-    conn_num = s.execute('update push set conn_num="%d" where namespace="/task_i"' % conn_num)
-    s.commit()
-    if not s.execute('select status from push where namespace="/task_i"').fetchall()[0][0]:
-        s.execute('update push set status=1 where namespace="/task_i"')
+    with thread_lock:
+        s = connect_db()
+        conn_num = s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0]+1
+        conn_num = s.execute('update push set conn_num="%d" where namespace="/task_i"' % conn_num)
         s.commit()
-        t = Thread(target=refresh_task_i)
-        t.start()
-    s.close()
+        if not s.execute('select status from push where namespace="/task_i"').fetchall()[0][0]:
+            s.execute('update push set status=1 where namespace="/task_i"')
+            s.commit()
+            t = Thread(target=refresh_task_i)
+            t.start()
+        s.close()
         
 @socketio.on('disconnect', namespace='/task_i')
 def del_conn():
-    s = connect_db()
-    conn_num = s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0]-1
-    conn_num = s.execute('update push set conn_num="%d" where namespace="/task_i"' % conn_num)
-    s.commit()
-    s.close()
+    with thread_lock:
+        s = connect_db()
+        conn_num = s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0]-1
+        conn_num = s.execute('update push set conn_num="%d" where namespace="/task_i"' % conn_num)
+        s.commit()
+        s.close()
     
 def refresh_task_i():
     s = connect_db()
     while True:
         time.sleep(6)
-        if s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0] == 0:
-            s.execute('update push set status=0 where namespace="/task_i"')
-            s.commit()
-            s.close()
-            break
-        else:
-            socketio.emit('task_data', {'msg': 'ok'}, namespace='/task_i')
+        with thread_lock:
+            if s.execute('select conn_num from push where namespace="/task_i"').fetchall()[0][0] == 0:
+                s.execute('update push set status=0 where namespace="/task_i"')
+                s.commit()
+                s.close()
+                break
+            else:
+                socketio.emit('task_data', {'msg': 'ok'}, namespace='/task_i')
             
             
 @app.route('/task_detail', methods=['GET'])
@@ -923,4 +1032,4 @@ def project_m():
                 g.db.commit()
                 return jsonify(code=200)
             except Exception as e:
-                return jsonify(code=201, msg=e)
+                return jsonify(code=201, msg=repr(e))

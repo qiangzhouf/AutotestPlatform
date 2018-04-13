@@ -76,11 +76,11 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a data-toggle="collapse" data-target="{{'#'+scene[0]}}{{case[0]}}" id="{{case[2]}}">日志</a>
+                    <a data-toggle="collapse" data-target="{{'#'+scene[0]}}{{case[0]}}{{loop.index}}" id="{{case[2]}}">日志</a>
                 </td>
               </tr>
               {% if case[2] %}
-                <tr class="collapse" id="{{scene[0]}}{{case[0]}}" ><td align="center" colspan="5"><textarea style="width:100%;height:300px"></textarea></td></tr>
+                <tr class="collapse" id="{{scene[0]}}{{case[0]}}{{loop.index}}" ><td align="center" colspan="5"><textarea style="width:100%;height:300px"></textarea></td></tr>
               {% endif %}
               {% else %}
               <tr><td colspan="5">暂无接口</td></tr>

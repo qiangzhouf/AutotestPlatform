@@ -5,9 +5,9 @@
     2、post/get下发参数修改（Interface实例变量self.params）
     3、接口响应后，响应参数校验（Interface实例变量
         self.result <三方库requests中的Response对象>）
-    4、响应参数保存/删除，保存到Interface.g这个类变量中
+    4、响应参数保存/删除，保存到self.g这个线程局部变量中
         （方便多个接口请求时，中间数据传递）
-    5、下发参数self.params动态替换（Interface.g变量,
+    5、下发参数self.params动态替换（self.g这个线程局部变量,
         以及时间参数
         （'*now', '*today0', '*today24', '*now+x', '*now-x'））
 '''
@@ -23,6 +23,7 @@ import base64
 import random
 import os
 from mylog import *
+import uuid
 
 
 class Interface:
@@ -38,10 +39,9 @@ class Interface:
     db_path = 'web.db'
     cookie = None
     protocol = 'http://'# https://
-    g = {}
     
     # 实例化方法
-    def __init__(self, method, url, params, headers=None):
+    def __init__(self, method, url, params, headers=None, g={}):
         # 基本属性
         self.log = log_config()
         self.method = method
@@ -57,21 +57,22 @@ class Interface:
         
         # 接口下发后，响应结果对象
         self.result = None
+        self.g = g
 
     # 参数修改
     def modify_params(self,k_v):
-        Interface.dynamic_params(k_v)
-        k_v = self.g_replace(k_v)
-        '''
-        for k in self.params:
-            self.params[k] = ''
-       '''
-        for k in k_v:
-            if isinstance(k_v[k], str):
-                if '*base64.' in k_v[k]:
-                    k_v[k] = img_b64(os.getcwd() + '/image/'+ k_v[k].replace('*base64.', ''))
-            self.params[k] = k_v[k]
-    
+        try:
+            Interface.dynamic_params(k_v)
+            k_v = self.g_replace(k_v)
+
+            for k in k_v:
+                if isinstance(k_v[k], str):
+                    if '*base64.' in k_v[k]:
+                        k_v[k] = img_b64(os.getcwd() + '/image/'+ k_v[k].replace('*base64.', ''))
+                self.params[k] = k_v[k]
+        except:
+            self.log.info('Modify_params failed! '+str(k_v))
+            
     # 下发接口
     def request(self):
         try:
@@ -81,7 +82,19 @@ class Interface:
                 r = requests.get(Interface.protocol+Interface.host+self.url, 
                             params=self.params, headers=self.headers)
             elif self.method == 'POST':
-                r = requests.post(Interface.protocol+Interface.host+self.url, 
+                files = {}
+                for key in self.params:
+                    if isinstance(self.params[key], str):
+                        if '*file.' in self.params[key]:
+                            tmp = self.params[key].replace('*file.', '')
+                            files[key] = (str(uuid.uuid1())+tmp.split('.')[-1], open('image/'+tmp, 'rb'))
+                for key in files:
+                    del self.params[key]
+                if files:
+                    r = requests.post(Interface.protocol+Interface.host+self.url, 
+                            params=self.params, files=files, headers=self.headers)
+                else:
+                    r = requests.post(Interface.protocol+Interface.host+self.url, 
                             json=self.params, headers=self.headers)
             self.result = r
             assert(self.result.status_code == 200)
@@ -128,7 +141,11 @@ class Interface:
     
     # 响应结果json数据获取
     def get_json(self, key):
-        tmp = self.result.json()
+        try:
+            tmp = self.result.json()
+        except:
+            return None
+            self.log.error('Get_json! '+ str(self.result.content))
         try:
             for elem in key.split('.'):
                 if elem == '*r':
@@ -144,31 +161,43 @@ class Interface:
     
     # 保存过程值
     def g_push(self, key_list):
-        for k in key_list:
-            Interface.g[k] = self.get_json(k)
-        self.log.info('G push values: ' + 
-                str([str(k)+':'+str(Interface.g[k]) for k in key_list]))
-            
-    # 删除过程值
-    def g_pop(self, key_list):
-        self.log.info('G pop values: ' + 
-                str([str(k)+':'+str(Interface.g[k]) for k in key_list]))
-        for k in key_list:
-            del Interface.g[k]
+        try:
+            for k in key_list:
+                self.g[k] = self.get_json(k)
+            self.log.info('G push values: ' + 
+                    str([str(k)+':'+str(self.g[k]) for k in key_list]))
+        except:
+            self.log.error('G_push failed! '+ str(key_list) + str(self.g))
+          
         
     # 全局参数替换
     def g_replace(self, k_v):
-        for k in k_v:
-            if not (isinstance(k, str) and isinstance(k_v[k], str)):
-                continue
-            if '*g.' in k_v[k]:
-                if '..' in k_v[k]:
-                    for elem in k_v[k].split('..')[1:]:
-                        tmp = Interface.g[k_v[k].split('..')[0].replace('*g.', '')][elem]
-                    k_v[k] = tmp 
-                else:
-                    k_v[k] = Interface.g[k_v[k].replace('*g.', '')]
-        return k_v
+        c_ = k_v.copy()
+        try:
+            for k in k_v:
+                if not isinstance(k_v[k], str):
+                    continue
+                if '*g.' in k_v[k]:
+                    #print(k, k_v[k])
+                    tmp_v = []
+                    for elem in k_v[k].split(','):
+                        if '..' in elem:
+                            tmp = self.g[elem.split('..')[0].replace('*g.', '')]
+                            for child in elem.split('..')[1].split('.'):
+                                try:
+                                    tmp = tmp[int(child)]
+                                except:
+                                    tmp = tmp[child]
+                            tmp_v.append(tmp)
+                        else:
+                            tmp_v.append(self.g[elem.replace('*g.', '')])
+                    #print(k, tmp_v)
+                    k_v[k] = ','.join([str(elem) for elem in tmp_v])
+            #print(k_v,'\n')
+            return k_v
+        except:
+            return c_
+            self.log.error('G_replace failed! '+ str(c_) + str(k_v))
 
     # 特殊参数动态生成（主要是时间类）
     @staticmethod
@@ -204,10 +233,11 @@ def set_cookie(interface_name, project, data=None):
         i.modify_params(data)
     i.request()
     Interface.cookie = i.result.headers['Set-Cookie'].split(';')[0]
+    return i.result.json()
     
 
 # 从数据库api表中读取接口参数，并实例化对象
-def interf(interface_name, project):
+def interf(interface_name, project, g={}):
     db = sqlite3.connect(Interface.db_path)
     result = db.execute('select method,url,data'
                   ' from api where project_name="%s" and name="%s"'
@@ -216,7 +246,7 @@ def interf(interface_name, project):
     tmp[2] = json.loads(tmp[2])
     for key in tmp[2]:
         tmp[2][key] = tmp[2][key]['value']
-    return Interface(*tmp)
+    return Interface(*tmp, g=g)
 
 
 # 图片base64编码

@@ -15,6 +15,9 @@ $(function(){
                 var html = '<tr><td>'+project+'</td><td><input/></td><td><input/></td><td align="center"><button class="btn btn-primary" id="modify">修改</button><button class="btn btn-danger" id="delete">删除</button></td></tr>'
                 $('input#project_name').val('');
                 $('table').find('tr').last().after(html)
+                $("h4#myModalLabel").text("提示");
+                $("div.modal-body").text("新增成功！");
+                $("button#send_alert").trigger("click");
             }
             else{
                 $("h4#myModalLabel").text("错误");
@@ -31,6 +34,9 @@ $(function(){
         $.post('/project_m', {'type': 'del', 'project': project}, function(data){
             if (data.code==200){
                 obj.remove();
+                $("h4#myModalLabel").text("提示");
+                $("div.modal-body").text('删除成功');
+                $("button#send_alert").trigger("click");
             }
             else{
                 $("h4#myModalLabel").text("错误");
@@ -51,7 +57,12 @@ $(function(){
                 $("h4#myModalLabel").text("错误");
                 $("div.modal-body").text(data.msg);
                 $("button#send_alert").trigger("click");
-            };
+            }
+            else{
+                $("h4#myModalLabel").text("提示");
+                $("div.modal-body").text('修改成功！');
+                $("button#send_alert").trigger("click");          
+            }
         });
     });
     

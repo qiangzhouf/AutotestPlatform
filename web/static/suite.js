@@ -20,6 +20,9 @@ $(function(){
         };
     });
     
+    $('select#project').get(0).selectedIndex=1
+    $("select#project").trigger("change"); 
+    
     //选择查看测试套时，加载项目所有
     $('select#suite').change(function(){
         if ($(this).val() != 'none'){
@@ -89,5 +92,50 @@ $(function(){
             };
         });
         
+    });
+    
+    // 新增测试套
+    $('button#new_suite').on('click', function(){
+        var project = $('select#project').val();
+        var suite = $('input#suite_name').val();
+        if (project=='' || suite==''){
+            $("h4#myModalLabel").text("提示");
+            $("div.modal-body").text("请选择项目和输入测试套名");
+            $("button#send_alert").trigger("click");
+            return
+        };
+        $.post('/suite', {'type': 'new_suite', 'suite': suite, 'project': project}, function(data){
+            $("h4#myModalLabel").text("提示");
+            $("div.modal-body").text(data.msg);
+            $("button#send_alert").trigger("click");
+            if (data.msg=="新增测试套成功"){
+                $('select#suite').append('<option value="'+suite+'">'+suite+'</option>');
+                $('select#suite').val(suite);
+                $('select#suite').trigger("change");
+                $('input#suite_name').val('')
+            }
+        });
+    });
+    
+    // 删除测试套
+    $('button#del_s').on('click', function(){
+        var project = $('select#project').val();
+        var suite = $('select#suite').val();
+        if (project=='' || suite==''){
+            $("h4#myModalLabel").text("提示");
+            $("div.modal-body").text("请选择要删除的测试套");
+            $("button#send_alert").trigger("click");
+            return
+        };
+        $.post('/suite', {'type': 'del_suite', 'suite': suite, 'project': project}, function(data){
+            $("h4#myModalLabel").text("提示");
+            $("div.modal-body").text(data.msg);
+            $("button#send_alert").trigger("click");
+            if (data.msg=="删除成功"){
+                $('select#suite option[value="'+suite+'"]').remove();
+                $('select#suite').get(0).selectedIndex=0
+                $('select#suite').trigger("change");
+            }
+        });
     });
 });

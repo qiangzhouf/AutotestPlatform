@@ -25,15 +25,17 @@ class Case:
     fh = logging.FileHandler('log/'+str(uuid.uuid1())+'_log.txt', mode='w')
     
     def __init__(self, project, name, data=None, assert_data=None, 
-                 save_data=None, del_data=None, pre_time=0):
+                 save_data=None, del_data=None, pre_time=0, g={}, s=''):
         self.name = name
-        self.interface = interf(name, project)
+        self.g = g
+        self.interface = interf(name, project, self.g)
         self.data = data
         self.assert_data = assert_data
         self.save_data = save_data
         self.del_data = del_data
         self.status = [0,0]
         self.pre_time = pre_time
+        self.s = s
         
     def run(self):
         # 日志配置
@@ -41,7 +43,7 @@ class Case:
             self.interface.log.removeHandler(Case.fh)
         except:
             pass
-        log_file = 'log/'+str(uuid.uuid1())+'_log.txt'
+        log_file = 'log/'+str(uuid.uuid1())+'-'+str(self.s)+'-'+str(self.name)+'_log.txt'
         fh = logging.FileHandler(log_file, mode='w')
         formatter = logging.Formatter('[%(levelname)s] - [%(asctime)s] - %(filename)s\n%(message)s\n') 
         fh.setFormatter(formatter)
@@ -49,32 +51,31 @@ class Case:
         self.interface.log.addHandler(fh)
         Case.fh = fh
         
-        if self.pre_time:
-            time.sleep(self.pre_time)
-        
-        if self.data:
-            if not isinstance(self.data, dict):
-                self.data = json.loads(self.data)
-            self.interface.modify_params(self.data)
-        
-        if self.interface.request():
-            self.status[0] = 1
-        
-        if self.assert_data:
-            if not isinstance(self.assert_data, dict):
-                self.assert_data = json.loads(self.assert_data)
-            if self.interface.assert_response(self.assert_data):
-                self.status[1] = 1
-        else:
-            self.status[1] = 1 
-        
-        if self.save_data:
-            self.save_data = self.save_data.replace(' ','').split(',')
-            self.interface.g_push(self.save_data)
-            
-        if self.del_data:
-            self.del_data = self.del_data.replace(' ','').split(',')
-            self.interface.g_pop(self.del_data)
+        try:
+            if self.pre_time:
+                time.sleep(self.pre_time)
+
+            if self.data:
+                if not isinstance(self.data, dict):
+                    self.data = json.loads(self.data)
+                self.interface.modify_params(self.data)
+
+            if self.interface.request():
+                self.status[0] = 1
+
+            if self.assert_data:
+                if not isinstance(self.assert_data, dict):
+                    self.assert_data = json.loads(self.assert_data)
+                if self.interface.assert_response(self.assert_data):
+                    self.status[1] = 1
+            else:
+                self.status[1] = 1 
+
+            if self.save_data:
+                self.save_data = self.save_data.replace(' ','').split(',')
+                self.interface.g_push(self.save_data)
+        except:
+            pass
             
         return self.name, self.status, log_file
     

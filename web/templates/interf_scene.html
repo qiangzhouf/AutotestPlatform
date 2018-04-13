@@ -8,7 +8,7 @@
 </div>
 <div class="row">
   <div class="col-md-1"></div>
-  <div class="col-md-6" style="background:#FFF;border-radius:10px;">
+  <div class="col-md-10" style="background:#FFF;border-radius:10px;">
     <div class="row" style="height:20px;"></div>
     <form class="form-inline">
       <div class="form-group">
@@ -29,6 +29,13 @@
         <select class="form-control" name="select_set" id="scene">
             <option value="none">请选择场景</option>
         </select>
+          <button class="btn btn-danger" id="del_scene" type="button">删 除</button>
+      </div>
+        <div class="form-group" style="margin:0px 50px">
+        <label>场景复制:</label>
+        <select class="form-control" id="scene_copy">
+            <option value="none">请选择场景</option>
+        </select>
       </div>
     </form>
     <div class="row" style="height:20px;"></div>
@@ -41,13 +48,14 @@
     <div class="col-md-10" style="padding: 0px">
         <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;">
             <tr id="case_params" class="info" id=-1>
-                <td style="width:10%"><b>执行顺序</b></td>
+                <td style="width:5%"><b>执行顺序</b></td>
                 <td style="width:10%"><b>接口名称</b></td>
                 <td style="width:20%"><b>请求参数 ( json格式 )</b></td>
                 <td style="width:20%"><b>校验参数 ( json格式 )</b></td>
                 <td style="width:10%"><b>中间变量 (多个,分隔)</b></td>
-                <td style="width:10%"><b>清除变量 (多个,分隔)</b></td>
-                <td style="width:10%"><b>准备时间</b></td>
+                <td style="width:10%"><b>备注</b></td>
+                <td style="width:5%"><b>准备时间(s)</b></td>
+                <td style="width:10%"><b>调试结果</b></td>
                 <td align='center'>
                     <button class="btn btn-danger" id="zmd">提交修改</button>
                     <button class="btn btn-success" id="n" style="padding:0px 8px"><font size="4">+</font> </button>

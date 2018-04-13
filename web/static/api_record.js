@@ -117,6 +117,26 @@ $(function(){
         $(this).css("background", "#fff")
     });
     
+    // 删除接口
+    $('button#del_i').on('click', function(){
+        if ($('input#project').val()=='' || $('input#api').val()==''){
+            $("h4#myModalLabel").text("提示");
+            $("div.modal-body").text('请选择要删除的接口！');
+            $("button#send_alert").trigger("click");
+            return
+        }
+        $.post('/project_api', {'get': 'del', 'project_name': $('input#project').val(), 'api_name': $('input#api').val()}, function(data){
+            $("h4#myModalLabel").text("提示");
+            $("div.modal-body").text(data.msg);
+            $("button#send_alert").trigger("click");
+            if (data.msg=='删除成功'){
+                refresh_select();
+                $('input#api').val('')
+            };
+        });
+    });
+    
+    
     //接口选择，接口查看编辑修改
     $("div#lay").on('click', 'li.api', function(){
         $(this).parents('div.sub_api').hide()
@@ -217,7 +237,7 @@ $(function(){
             if (j_assert_data != ''){
                 var assert_type = '<select class="form-control"><option value ="null">Null</option><option value ="value">Value</option><option value="exist">Exist</option><option value="length">Length</option><option value="range">Range</option><option value="set">Set</option></select>'
                 for(var key in j_assert_data){
-                    var new_html = '<tr class="assert"><td>' + key + '</td><td></td><td>' + assert_type + '</td><td class="av"></td></tr>';
+                    var new_html = '<tr class="assert"><td style="width:20%;word-wrap:break-word;">' + key + '</td><td style="width:20%;word-wrap:break-word;"></td><td style="width:20%;word-wrap:break-word;">' + assert_type + '</td><td class="av" style="width:20%;word-wrap:break-word;"></td></tr>';
                     $('table#assert_tb').find('tr').last().after(new_html);
                     $('table#assert_tb').find('tr').last().find('td').eq(2).find('select').val(j_assert_data[key]['assert_type'])
                     if (j_assert_data[key]['assert_type'] == 'exist'){
@@ -485,7 +505,30 @@ $(function(){
         //ajax下发post数据
         $.post('/api_test', {'pak': JSON.stringify(pak), 'url': url, 'host': host, 'method': method, 'data': JSON.stringify(datas), 'auth': JSON.stringify(auth), 'headers': JSON.stringify(headers), 'project': $('input#project').val()}, function(data){
             $('span#status_code').text(data.status_code);
+            if (data.status_code<300){
+                $('span#status_code').attr('class', "label label-success");
+            }
+            else if (data.status_code<400){
+                $('span#status_code').attr('class', "label label-info");
+            }
+            else if (data.status_code<500){
+                $('span#status_code').attr('class', "label label-warning");
+            }
+            else {
+                $('span#status_code').attr('class', "label label-danger");
+            }
             $('span#request_time').text(data.request_time);
+            var n = parseInt(data.request_time)
+            if (n<1000){
+                $('span#request_time').attr('class', "label label-success");
+            }
+            else if (n<3000){
+                $('span#request_time').attr('class', "label label-warning");
+            }
+            else {
+                $('span#request_time').attr('class', "label label-danger");
+            }
+            
             $('textarea#response-json').val(JSON.stringify(data.response, null, 4))
             $('textarea#request-json').val(JSON.stringify(data.request, null, 4))
             $('textarea#response-text').val(JSON.stringify(data.response))
@@ -502,7 +545,7 @@ $(function(){
                 parse_res(data.response, assert_obj)
                 var assert_type = '<select class="form-control"><option value ="null">Null</option><option value ="value">Value</option><option value="exist">Exist</option><option value="length">Length</option><option value="range">Range</option><option value="set">Set</option></select>'
                 for(var key in assert_obj){
-                    var new_html = '<tr class="assert"><td style="width:20%;overflow:hidden">' + key + '</td><td style="width:25%;overflow:hidden">' + assert_obj[key] + '</td><td style="width:20%;overflow:hidden">' + assert_type + '</td><td class="av" style="width:25%;overflow:hidden""></td></tr>';
+                    var new_html = '<tr class="assert"><td style="width:20%;word-wrap:break-word;">' + key + '</td><td style="width:25%;word-wrap:break-word;">' + assert_obj[key] + '</td><td style="width:20%;word-wrap:break-word;">' + assert_type + '</td><td class="av" style="width:25%;word-wrap:break-word;"></td></tr>';
                     $('table#assert_tb').find('tr').last().after(new_html);
                 };
             }
@@ -580,9 +623,9 @@ $(function(){
             $("button#send_alert").trigger("click");
             return
         }
-        if ($('input#api').val() == ''){
+        if ($('input#api').val() == '' || $('input#api').val().indexOf("-")==-1){
             $("h4#myModalLabel").text("提示");
-            $("div.modal-body").text("请输入接口名称！");
+            $("div.modal-body").text("请输入接口名称, 命名规范《分类-名称》！");
             $("button#send_alert").trigger("click");
             return
         }

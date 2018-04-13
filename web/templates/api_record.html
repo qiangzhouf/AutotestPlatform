@@ -73,8 +73,9 @@
       </div>
         <div class="col-md-4 col-xs-5">
       <button id="send" type="button" class="btn btn-success">发送</button>
-      <button id="save" type="button" class="btn btn-default">新增</button>
-    <button id="save" type="button" class="btn btn-default">修改</button>
+      <button id="save" type="button" class="btn btn-primary">新增</button>
+    <button id="save" type="button" class="btn btn-warning">修改</button>
+            <button id="del_i" type="button" class="btn btn-danger">删除</button>
       <button id="send_alert" class="btn btn-lg" data-toggle="modal" data-target="#myModal" style="display:none"></button></div>
     </div>
     <div class="row" style="height:10px;"></div>
@@ -143,7 +144,7 @@
                     <input type="radio" name="auth" id="optionsRadios2"  value="Basic"> Basic auth
                 </label>
                 <label class="radio-inline" style="margin:3px 0px">
-                    <input type="radio" name="auth" id="optionsRadios3"  value="Digst"> Digst auth
+                    <input type="radio" name="auth" id="optionsRadios3"  value="Digst"> Digest auth
                 </label>
                 <div class="radio-inline" >
                     <div name="authup" style="display: none;">
@@ -185,10 +186,10 @@
         <span id="status" style="border-radius: 90px;background-color:red"> </span>
       </div>
       <div class="col-md-2" style="margin:15px 0px 0px 0px">
-        状态码：<span id="status_code"></span>
+        状态码：<span id="status_code" style="padding: 3px 6px;border-radius: 8px;"></span>
       </div>
       <div class="col-md-2" style="margin:15px 0px 0px 0px">
-        请求时长：<span id="request_time"></span>
+        请求时长：<span id="request_time" style="padding: 3px 6px;border-radius: 8px;"></span>
       </div>   
      </div>
      <div class="row" style="height:10px;"></div>
@@ -220,7 +221,7 @@
                <div class="tab-pane fade" id="assert">
                     <div class="row">
                   <div class="col-md-12"> 
-                  <table class="table table-condensed table-bordered" id="assert_tb">
+                  <table class="table table-condensed table-bordered" id="assert_tb" style="table-layout:fixed">
                   <tr class="active">
                       <td style="width:20%">键(Key)</td>
                       <td style="width:25%">值(Value)</td>
