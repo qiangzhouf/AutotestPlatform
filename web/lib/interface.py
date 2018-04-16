@@ -163,9 +163,16 @@ class Interface:
     def g_push(self, key_list):
         try:
             for k in key_list:
-                self.g[k] = self.get_json(k)
-            self.log.info('G push values: ' + 
-                    str([str(k)+':'+str(self.g[k]) for k in key_list]))
+                if k in self.g:
+                    if not isinstance(self.g[k], list):
+                        self.g[k] = [self.g[k], 1]
+                        self.g[k+'1'] = self.g[k][0]
+                    self.g[k+str(self.g[k][1]+1)] = self.get_json(k)
+                    self.log.info('G push values: ' + str(k)+':' + str(self.g[k+str(self.g[k][1]+1)]))
+                    self.g[k][1] = self.g[k][1] + 1
+                else:
+                    self.g[k] = self.get_json(k)
+                    self.log.info('G push values: ' + str(k)+':'+str(self.g[k]))
         except:
             self.log.error('G_push failed! '+ str(key_list) + str(self.g))
           

@@ -46,8 +46,9 @@
 <div class="row" id="sence_data" style="display:none">
     <div class="col-md-1"></div>
     <div class="col-md-10" style="padding: 0px">
-        <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;">
-            <tr id="case_params" class="info" id=-1>
+    <div style="padding:0px 17px 0px 0px">
+        <table class="table table-condensed table-bordered" style="background:#FFF;table-layout:fixed;margin:0px" id="header">
+            <tr class="info" id=-1>
                 <td style="width:5%"><b>执行顺序</b></td>
                 <td style="width:10%"><b>接口名称</b></td>
                 <td style="width:20%"><b>请求参数 ( json格式 )</b></td>
@@ -63,6 +64,26 @@
             </tr>
         </table>
     </div>
+    <div style="height:600px;overflow-y:auto;overflow-x:hidden;" id='d'>
+      <table class="table table-condensed table-bordered" id="data" style="background:#FFF;table-layout:fixed;margin:0px;">
+          <tr class="info" id=-1 style="display:none">
+              <td style="width:5%"><b>执行顺序</b></td>
+                <td style="width:10%"><b>接口名称</b></td>
+                <td style="width:20%"><b>请求参数 ( json格式 )</b></td>
+                <td style="width:20%"><b>校验参数 ( json格式 )</b></td>
+                <td style="width:10%"><b>中间变量 (多个,分隔)</b></td>
+                <td style="width:10%"><b>备注</b></td>
+                <td style="width:5%"><b>准备时间(s)</b></td>
+                <td style="width:10%"><b>调试结果</b></td>
+                <td align='center'>
+                    <button class="btn btn-danger" id="zmd">提交修改</button>
+                    <button class="btn btn-success" id="n" style="padding:0px 8px"><font size="4">+</font> </button>
+                </td>
+          </tr>
+      </table>
+    </div>
+    </div>
+
 </div>
 
 {% endblock %}

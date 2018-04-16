@@ -581,9 +581,9 @@ def api_test():
     except:
         pak = 'none'
         api_name = request.form['name']
-        req_host  = 'http://' + g.db.execute('select host from project where name="%s";' % project_name).fetchall()[0][0]
+        req_host  = g.db.execute('select host from project where name="%s";' % project_name).fetchall()[0][0]
         req_method, req_url = g.db.execute('select method, url from api where name="%s" and project_name="%s";' % (api_name, project_name)).fetchall()[0]
-        req_url = req_host + req_url
+        req_url = 'http://' + req_host + req_url
     
     # 一所视图库项目需要在json对象外层包裹object, objectlist的特殊处理
     if request.form['data'] == '""':

@@ -42,7 +42,7 @@ $(function(){
             }, function(data){
                 $('tr.dam').remove()
                 for (i=0;i<data.cases.length;i++){
-                    var tr = $('table').find('tr').last()
+                    var tr = $('table#data')
                     var html = ''
                     html = html + '<tr style="height:200px" class="dam"><td  style="width:5%">' + (i+1) + '</td>'
                     for (j=0;j<6;j++){
@@ -57,13 +57,14 @@ $(function(){
                             };
                             html = html + '<td style="width:20%;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px">' + tmp + '</textarea></td>';
                         }
-                        else if (j==6){
+                        else if (j==5){
                             html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}
                         else{html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}; 
                     };
                     html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></tr>';
-                tr.after(html)
+                tr.append(html)
                 };
+                refresh_div()
                 //tr.after()
             });
         }
@@ -96,13 +97,14 @@ $(function(){
                             };
                             html = html + '<td style="width:20%;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px">' + tmp + '</textarea></td>';
                         }
-                        else if (j==6){
+                        else if (j==5){
                             html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}
                         else{html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}; 
                     };
                     html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></td></tr>';
                 };
                 tr.after(html)
+                refresh_div()
             });
         }
         else{
@@ -111,7 +113,7 @@ $(function(){
     });
     
     //双击表格元素修改内容
-    $('table').on('dblclick', 'td.dam', function(){
+    $('table#data').on('dblclick', 'td.dam', function(){
         var e_index = $(this).parent().find('td').index(this)
         if (e_index != 1 && e_index != 2 && e_index != 3){
             ori_data = $(this).text()
@@ -143,7 +145,7 @@ $(function(){
     });
 
     //焦点丢失时修改成功，只是前端缓存
-    $('table').on('blur', 'td#click', function(){
+    $('table#data').on('blur', 'td#click', function(){
         var e_index = $(this).parent().find('td').index(this)
         var obj = $(this)
         if (e_index == 1){
@@ -157,41 +159,44 @@ $(function(){
     });
     
     //删除接口
-    $('table').on('click', 'button#g', function(){
+    $('table#data').on('click', 'button#g', function(){
         var tb = $(this).parents('table')
         $(this).parents('tr').remove();
         var trs = tb.find('tr.dam');
+        refresh_div()
         for (i=0;i<trs.length;i++){
             trs.eq(i).find('td').eq(0).text(i+1)
         }
     });
     
     //新增接口
-    $('table').on('click', 'button#n', function(){
-        var trs = $(this).parents('table').find('tr')
+    $('table#header').on('click', 'button#n', function(){
+        var trs = $('table#data').find('tr')
         var html = '<tr style="height:200px" class="dam"><td  style="width:5%">'+trs.length+'</td>'
         for (i=0;i<6;i++){
             if (i==1 || i==2){html += '<td style="width:20%;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px"></textarea></td>'}
-            else if (j==6){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
+            else if (i==5){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
             else{html += '<td style="width:10%;word-wrap:break-word;" class="dam"></td>'}
         };
         html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></td></tr>';
         trs.last().after(html);
+        refresh_div()
     });
     
     //上方新增接口
-    $('table').on('click', 'button#ld', function(){
+    $('table#data').on('click', 'button#ld', function(){
         var tr = $(this).parents('tr')
         var html = '<tr style="height:200px" class="dam"><td  style="width:10%"></td>'
         for (i=0;i<6;i++){
             if (i==1 || i==2){html += '<td style="width:20%;o;word-wrap:break-word;" class="dam"><textarea class="dam" style="width:100%;height:200px"></textarea></td>'}
-            else if (j==6){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
+            else if (i==5){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
             else{html += '<td style="width:10%;word-wrap:break-word;" class="dam"></td>'}
         };
         html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></td></tr>';
         tr.before(html);
         //刷新序号
-        trs = $('table').find('tr');
+        refresh_div()
+        trs = $('table#data').find('tr');
         for (var i=1;i<trs.length;i++){
             trs.eq(i).find('td').first().text(i);
         }
@@ -260,7 +265,7 @@ $(function(){
     
     //修改场景
     $('button#zmd').on('click', function(){
-        var trs = $('div#sence_data').find('tr.dam');
+        var trs = $('div#table_data').find('tr.dam');
         var data = [];
         var case_data = [];
         for (i=0;i<trs.length;i++){
@@ -313,7 +318,7 @@ $(function(){
     });
     
     // 文本框修改时，触发json校验
-    $('table').on('blur', 'textarea.dam', function(){
+    $('table#data').on('blur', 'textarea.dam', function(){
         try{
             JSON.parse($(this).val());
             $(this).attr('style', $(this).attr('style').replace(/background-color:#FFB5C5;/g, ''))
@@ -324,12 +329,23 @@ $(function(){
     });
     
     // 单步调试
-    $('table').on('click', 'button#run', function(){
+    $('table#data').on('click', 'button#run', function(){
         var name = $(this).parents('tr').find('td').eq(1).text();
-        var datas = $(this).parents('tr').find('td').eq(2).text();
+        var datas = $(this).parents('tr').find('td').eq(2).find('textarea').val();
         var tx =  $(this).parents('tr').find('td').eq(7).find('textarea');
         $.post('/api_test', {'data': datas, 'auth': '"none"', 'headers': '""', 'project': $('select#project').val(), 'name': name}, function(data){
             tx.val(data.status_code + '  ' + data.request_time + '\n\n' + JSON.stringify(data.response,null,4));
         });
     });
+    
+    // 刷新表格宽带
+    function refresh_div(){
+        var i = $('table#data').find('tr').length;
+        if (i<4){
+            $('div#d').attr('style', "height:600px;overflow-y:auto;overflow-x:hidden;padding:0px 17px 0px 0px");
+        }
+        else{
+            $('div#d').attr('style', "height:600px;overflow-y:auto;overflow-x:hidden;");
+        }
+    };
 });
