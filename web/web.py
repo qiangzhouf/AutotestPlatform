@@ -1020,8 +1020,11 @@ def task_detail():
 
 @app.route('/interf_log', methods=['POST'])
 def interf_log():
-    with open(request.form['logfile'], 'r') as f:
-        log_ = f.read()
+    try:
+        with open(request.form['logfile'], 'r') as f:
+            log_ = f.read()
+    except:
+        log_ = '日志未找到！'
     return jsonify(log=log_)
 
 
