@@ -30,18 +30,20 @@ python3 server.py
 
 </code></pre>
 <pre><code>
-# 启动web服务,启动器自定义uwsgi.ini配置
+# 启动web服务,启动时可自定义uwsgi.ini配置
 
 cd AutotestPlatform/web
 uwsgi -i uwsgi.ini
 
-（启动成功后，即可访问自动化测试平台(admin/intedio)）
+（启动成功后，即可访问自动化测试平台(admin/intedio),账户密码在wep.py里配置，暂无用户管理）
 </code></pre>
 
 ### 示例：
 #### 接口自动化测试模块
 1、单个接口录入
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/1.png)
+![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/6.png)
+![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/7.png)
 2、多个接口组织场景
 ![](https://github.com/qiangzhouf/AutotestPlatform/raw/master/doc/2.png)
 3、新建测试套，并添加场景
