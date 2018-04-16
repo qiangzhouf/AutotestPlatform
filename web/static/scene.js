@@ -61,7 +61,7 @@ $(function(){
                             html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}
                         else{html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}; 
                     };
-                    html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
+                    html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></tr>';
                 tr.after(html)
                 };
                 //tr.after()
@@ -100,7 +100,7 @@ $(function(){
                             html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}
                         else{html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;" class="dam">' + data.cases[i][j] + '</td>'}; 
                     };
-                    html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
+                    html = html + '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></td></tr>';
                 };
                 tr.after(html)
             });
@@ -175,7 +175,7 @@ $(function(){
             else if (j==6){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
             else{html += '<td style="width:10%;word-wrap:break-word;" class="dam"></td>'}
         };
-        html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
+        html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></td></tr>';
         trs.last().after(html);
     });
     
@@ -188,7 +188,7 @@ $(function(){
             else if (j==6){html = html + '<td style="width:5%;margin: 80px 0px;word-wrap:break-word;" class="dam"></td>'}
             else{html += '<td style="width:10%;word-wrap:break-word;" class="dam"></td>'}
         };
-        html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea class="dam" style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button></td></tr>';
+        html += '<td style="width:10%;margin: 80px 0px;word-wrap:break-word;"><textarea style="width:100%;height:200px"></textarea></td><td  style="width:10%" align="center"><button class="btn btn-default" id="g" style="padding:0px 8px;margin: 80px 0px;"><font size="3">x</font> </button><button class="btn btn-default" id="ld" style="padding:0px 8px;margin: 80px 0px;"><font size="3">↑</font> </button><button class="btn btn-default" id="run" style="padding:0px 8px;margin: 80px 0px;"><font size="3">></td></font></button></td></tr>';
         tr.before(html);
         //刷新序号
         trs = $('table').find('tr');
@@ -313,13 +313,23 @@ $(function(){
     });
     
     // 文本框修改时，触发json校验
-    $('table').on('blur', 'textarea', function(){
+    $('table').on('blur', 'textarea.dam', function(){
         try{
             JSON.parse($(this).val());
             $(this).attr('style', $(this).attr('style').replace(/background-color:#FFB5C5;/g, ''))
         }
         catch(err){
             $(this).attr('style', 'background-color:#FFB5C5;'+$(this).attr('style'))
-    }
+        }
+    });
+    
+    // 单步调试
+    $('table').on('click', 'button#run', function(){
+        var name = $(this).parents('tr').find('td').eq(1).text();
+        var datas = $(this).parents('tr').find('td').eq(2).text();
+        var tx =  $(this).parents('tr').find('td').eq(7).find('textarea');
+        $.post('/api_test', {'data': datas, 'auth': '"none"', 'headers': '""', 'project': $('select#project').val(), 'name': name}, function(data){
+            tx.val(data.status_code + '  ' + data.request_time + '\n\n' + JSON.stringify(data.response,null,4));
+        });
     });
 });

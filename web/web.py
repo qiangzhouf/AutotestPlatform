@@ -569,12 +569,23 @@ def api_record():
 def api_test():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    pak = json.loads(request.form['pak'])['type']
-    pak_name = json.loads(request.form['pak'])['object_name']
-    req_host = request.form['host']
-    req_url = 'http://' + req_host + request.form['url']
-    req_method = request.form['method']
+    
+    # 获取post传递过来的参数
     project_name = request.form['project']
+    try:
+        pak_name = json.loads(request.form['pak'])['object_name']
+        pak = json.loads(request.form['pak'])['type']
+        req_host = request.form['host']
+        req_url = 'http://' + req_host + request.form['url']
+        req_method = request.form['method']
+    except:
+        pak = 'none'
+        api_name = request.form['name']
+        req_host  = 'http://' + g.db.execute('select host from project where name="%s";' % project_name).fetchall()[0][0]
+        req_method, req_url = g.db.execute('select method, url from api where name="%s" and project_name="%s";' % (api_name, project_name)).fetchall()[0]
+        req_url = req_host + req_url
+    
+    # 一所视图库项目需要在json对象外层包裹object, objectlist的特殊处理
     if request.form['data'] == '""':
         req_data = {}
     else:
@@ -593,8 +604,14 @@ def api_test():
                     req_data = { pak_name+'ListObject': {pak_name+'Object': [json.loads(request.form['data']) ]}}
         else:
             req_data = json.loads(request.form['data'])
+    
+    # 关键字替换变量
     Interface.dynamic_params(req_data)
+    
+    # 授权的处理
     req_auth = request.form['auth']
+    
+    # 头部处理
     if request.form['headers'] == '""':
         req_headers = {}
     else:
@@ -613,6 +630,7 @@ def api_test():
         pass
     req_headers['Cookie'] = Interface.cookie
     
+    # 进行请求
     try:
         if req_method == 'GET':
             if req_auth == '"none"':
@@ -687,6 +705,8 @@ def api_test():
                     t = time.time()
                     req = requests.delete(req_url, headers=req_headers, auth=HTTPDigestAuth(req_auth['username'], req_auth['password']))
                     delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
+        
+        # 响应处理
         res_headers = dict(req.headers)
         res_status_code = req.status_code
         try:
@@ -694,12 +714,14 @@ def api_test():
         except:
             res_data = str(req.text)
         res_time = delt_t
+        
     except Exception as e:
         print(repr(e))
         res_status_code = 500
         res_time = 0
         res_data = {}
         res_headers = {}
+        
     return jsonify({'status_code': res_status_code, 'request_time': res_time, 'response': res_data, 'res_h': res_headers, 'request': req_data})
 
 
