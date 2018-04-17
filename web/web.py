@@ -40,6 +40,12 @@ c.execute('update interf_task set status=2;')
 c.execute('update push set status=0, conn_num=0;')
 c.commit()
 c.close()
+# 日志清空
+try:
+    for elem in os.listdir('log/'):
+        os.remove('log/'+elem)
+except:
+    pass
 
 
 # 创建app

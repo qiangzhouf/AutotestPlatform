@@ -265,7 +265,7 @@ $(function(){
     
     //修改场景
     $('button#zmd').on('click', function(){
-        var trs = $('div#table_data').find('tr.dam');
+        var trs = $('table#data').find('tr.dam');
         var data = [];
         var case_data = [];
         for (i=0;i<trs.length;i++){
