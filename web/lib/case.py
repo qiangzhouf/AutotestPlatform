@@ -2,6 +2,7 @@ import uuid
 import time
 import json
 from interface import *
+import traceback
 
 
 class Case:
@@ -37,11 +38,12 @@ class Case:
         try:
             if self.pre_time:
                 time.sleep(self.pre_time)
-
+            
             if self.data:
                 if not isinstance(self.data, dict):
                     self.data = json.loads(self.data)
                 self.interface.modify_params(self.data)
+                self.interface.params = self.data
 
             if self.interface.request():
                 self.status[0] = 1
@@ -58,6 +60,7 @@ class Case:
                 self.save_data = self.save_data.replace(' ','').split(',')
                 self.interface.g_push(self.save_data)
         except:
+            print(traceback.format_exc())
             pass
             
         return self.name, self.status, self.interface.log_file

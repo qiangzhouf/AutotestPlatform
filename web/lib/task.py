@@ -4,6 +4,7 @@ import threading
 from interface import *
 import json
 import concurrent.futures
+import traceback
 
 
 class Task:
@@ -79,6 +80,7 @@ class Task:
                 self.db('update interf_task set progress="%d" where name="%s" and project="%s";' % (count, self.name, self.project))
             except:
                 print(single_scene,'该场景执行结果刷新失败')
+                print(traceback.format_exc())
         
     
     # 并发执行

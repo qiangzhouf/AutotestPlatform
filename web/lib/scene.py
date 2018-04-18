@@ -1,6 +1,7 @@
 import sqlite3
 from case import *
 from interface import *
+import traceback
 
 
 class Scene:
@@ -30,6 +31,7 @@ class Scene:
             s.close()
             return tmp.replace(' ','').split(',')
         except:
+            print(traceback.format_exc())
             return []
     
     def get_case_data(self, case_name):
@@ -44,16 +46,18 @@ class Scene:
             s.close()
             return tmp
         except:
+            print(traceback.format_exc())
             return []
     
     def run(self):
         result = []
         for elem in self.data:
             try:
+                # print(elem)
                 c = Case(*elem, g=self.g, s=self.name)
                 result.append(c.run())
             except Exception as e:
-                print(e)
+                print(traceback.format_exc())
                 result.append((elem[1], 0, ''))
             self.status.append(result[-1][1][0] and result[-1][1][1])
         return self.name, result, 1 if all(self.status) else 0

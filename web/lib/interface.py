@@ -24,6 +24,7 @@ import random
 import os
 import uuid
 import logging
+import traceback
 
 
 class Interface:
@@ -73,12 +74,8 @@ class Interface:
             Interface.dynamic_params(k_v)
             k_v = self.g_replace(k_v)
 
-            for k in k_v:
-                if isinstance(k_v[k], str):
-                    if '*base64.' in k_v[k]:
-                        k_v[k] = img_b64(os.getcwd() + '/image/'+ k_v[k].replace('*base64.', ''))
-                self.params[k] = k_v[k]
         except:
+            print(traceback.format_exc())
             self.log('info','Modify_params failed! '+str(k_v))
             
     # 下发接口
@@ -142,6 +139,7 @@ class Interface:
                 self.log('info','Assert success!  '
                             +k+': '+str(o_obj)+' | '+str(o_obj))
             except:
+                #print(traceback.format_exc())
                 self.log('error','Assert failed!  '
                              +k+' : '+str(o_obj)+' | '+str(obj))
                 return False
@@ -152,6 +150,7 @@ class Interface:
         try:
             tmp = self.result.json()
         except:
+            print(traceback.format_exc())
             return None
             self.log('error','Get_json! '+ str(self.result.content))
         try:
@@ -164,6 +163,7 @@ class Interface:
                     tmp = tmp[elem]
             return tmp
         except:
+            #print(traceback.format_exc())
             return None
         
     
@@ -182,6 +182,7 @@ class Interface:
                     self.g[k] = self.get_json(k)
                     self.log('info','G push values: ' + str(k)+':'+str(self.g[k]))
         except:
+            #print(traceback.format_exc())
             self.log('error','G_push failed! '+ str(key_list) + str(self.g))
           
         
@@ -202,6 +203,7 @@ class Interface:
                                 try:
                                     tmp = tmp[int(child)]
                                 except:
+                                    print(traceback.format_exc())
                                     tmp = tmp[child]
                             tmp_v.append(tmp)
                         else:
@@ -211,6 +213,7 @@ class Interface:
             #print(k_v,'\n')
             return k_v
         except:
+            #print(traceback.format_exc())
             return c_
             self.log('error','G_replace failed! '+ str(c_) + str(k_v))
 
@@ -266,6 +269,9 @@ def interf(interface_name, project, g={}, log=True):
 
 # 图片base64编码
 def img_b64(img_path):
-    with open(img_path, 'rb') as f:
-        return base64.b64encode(f.read()).decode('utf-8') 
+    try:
+        with open(img_path, 'rb') as f:
+            return base64.b64encode(f.read()).decode('utf-8')
+    except:
+        return img_path+'未找到图片'
     
