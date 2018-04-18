@@ -1,0 +1,272 @@
+Message-ID: <535363201.7.1524018508645.JavaMail.test@seemmo-server>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_6_1917026846.1524018508454"
+
+------=_Part_6_1917026846.1524018508454
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>=E5=AE=89=E8=A3=85=E9=83=A8=E7=BD=B2</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>=E5=AE=89=E8=A3=85=E9=83=A8=E7=BD=B2</h1>
+    <div class=3D"Section1">
+        <ol>
+<li>=E7=A1=AE=E8=AE=A4linux=E7=8E=AF=E5=A2=83=E5=B7=B2=E5=AE=89=E8=A3=85pyt=
+hon3<br>$&nbsp;python3 -V<br><br></li>
+<li>=E6=9E=84=E5=BB=BApython=E8=BF=90=E8=A1=8C=E8=99=9A=E6=8B=9F=E7=8E=AF=
+=E5=A2=83<br>$ mkdir Venv<br>$&nbsp;<span style=3D"color: rgb(0,0,0);">pyth=
+on3 -m venv Venv/</span><br><span style=3D"color: rgb(0,0,0);"><br></span><=
+/li>
+<li><span style=3D"color: rgb(0,0,0);">=E6=BF=80=E6=B4=BBpython=E8=99=9A=E6=
+=8B=9F=E7=8E=AF=E5=A2=83</span><br><span style=3D"color: rgb(0,0,0);">$ cd&=
+nbsp;Venv</span><br><span style=3D"color: rgb(0,0,0);">$ source bin/<span s=
+tyle=3D"color: rgb(0,0,0);">activate</span></span><br><span style=3D"color:=
+ rgb(0,0,0);">(<span style=3D"color: rgb(0,0,0);">Venv</span>) $&nbsp; &nbs=
+p;=E8=BF=99=E6=A0=B7=E8=A1=A8=E7=A4=BA=E6=BF=80=E6=B4=BB=E6=88=90=E5=8A=9F=
+=EF=BC=8C=E9=80=80=E5=87=BA=E8=99=9A=E6=8B=9F=E7=8E=AF=E5=A2=83de<span styl=
+e=3D"color: rgb(0,0,0);">activate</span></span><br><span style=3D"color: rg=
+b(0,0,0);"><br></span></li>
+<li><span style=3D"color: rgb(0,0,0);">=E5=AE=89=E8=A3=85=E4=BE=9D=E8=B5=96=
+=E4=B8=89=E6=96=B9=E5=BA=93</span><br><span style=3D"color: rgb(0,0,0);"><s=
+pan style=3D"color: rgb(0,0,0);">$&nbsp;</span></span>pip install selenium<=
+br>$ pip install flask<br>$ pip install flask_socketio<br>$ pip install req=
+uests<br>$ pip install uwsgi<br>$ pip install gevent<br><br></li>
+<li>=E6=9E=84=E5=BB=BA=E8=87=AA=E5=8A=A8=E5=8C=96=E6=B5=8B=E8=AF=95=E5=B9=
+=B3=E5=8F=B0<br><span style=3D"color: rgb(0,0,0);">$ cd&nbsp;Venv</span><br=
+>$ mkdir work<br>$ cd work<br>$ git clone&nbsp;<a class=3D"external-link" h=
+ref=3D"https://github.com/qiangzhouf/AutotestPlatform.git" rel=3D"nofollow"=
+>https://github.com/qiangzhouf/AutotestPlatform.git</a><br><br></li>
+<li>=E9=85=8D=E7=BD=AE=E5=92=8C=E5=90=AF=E5=8A=A8<br>$ cd&nbsp;AutotestPlat=
+form<br>$ vi web/uwsgi.ini<br><p>[uwsgi]<br>#socket =3D 127.0.0.1:3333<br>h=
+ttp =3D :8080<br>http-websockets =3D True<br>gevent =3D 1000<br>wsgi-file =
+=3D web.py<br>callable =3D app<br>#processes =3D 4<br>stats =3D 127.0.0.1:9=
+191<br>disable-logging =3D True<br>master =3D True</p>(http=E7=AB=AF=E5=8F=
+=A3=E5=8F=AF=E9=85=8D=E7=BD=AE=EF=BC=8C=E5=85=B6=E4=BB=96=E9=BB=98=E8=AE=A4=
+=E5=8D=B3=E5=8F=AF)<br><br>$ nohup python server.py &amp;<br>$ cd web<br>$ =
+nohup uwsgi -i uwsgi.ini &amp;<br><br><br><br></li>
+</ol>
+    </div>
+</body>
+</html>
+------=_Part_6_1917026846.1524018508454--
