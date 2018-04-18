@@ -1,3 +1,4 @@
+#!python -u
 import sys
 import os
 sys.path.append(os.getcwd()+'/lib')
@@ -642,7 +643,7 @@ def api_test():
             if req_auth == '"none"':
                 t = time.time()
                 req = requests.get(req_url, params=req_data, headers=req_headers)
-                print('\n', "\033[1;32;40m%s\033[0m" % '[GET]', req.url)
+                print('\n', '[GET]', req.url)
                 delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
             else:
                 req_auth = json.loads(req_auth)
@@ -669,7 +670,7 @@ def api_test():
                     req = requests.post(req_url, params=req_data, files=files, headers=req_headers)   
                 else:
                     req = requests.post(req_url, json=req_data, headers=req_headers)
-                print('\n', "\033[1;32;40m%s\033[0m" % '[POST]', req.url, req_data)
+                print('\n', '[POST]', req.url, req_data)
                 delt_t = str(round((time.time() - t)*1000, 1)) + ' ms'
             else:
                 req_auth = json.loads(req_auth)

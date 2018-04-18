@@ -22,8 +22,8 @@ import sqlite3
 import base64
 import random
 import os
-from mylog import *
 import uuid
+import logging
 
 
 class Interface:
@@ -41,9 +41,12 @@ class Interface:
     protocol = 'http://'# https://
     
     # 实例化方法
-    def __init__(self, method, url, params, headers=None, g={}):
+    def __init__(self, method, url, params, headers=None, g={}, log=True):
         # 基本属性
-        self.log = log_config()
+        if log:
+            self.log_file = 'log/'+str(uuid.uuid1())+'_'+str(int(time.time()*1000))+'_log.txt'
+        else:
+            self.log_file = None
         self.method = method
         self.url = url
         self.params = params
@@ -58,6 +61,11 @@ class Interface:
         # 接口下发后，响应结果对象
         self.result = None
         self.g = g
+        
+    def log(self, msg, content):
+        if self.log_file:
+            with open(self.log_file, 'a+') as f:
+                f.write('['+msg+']  '+time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())+'\n'+content+'\n\n')
 
     # 参数修改
     def modify_params(self,k_v):
@@ -71,7 +79,7 @@ class Interface:
                         k_v[k] = img_b64(os.getcwd() + '/image/'+ k_v[k].replace('*base64.', ''))
                 self.params[k] = k_v[k]
         except:
-            self.log.info('Modify_params failed! '+str(k_v))
+            self.log('info','Modify_params failed! '+str(k_v))
             
     # 下发接口
     def request(self):
@@ -98,8 +106,8 @@ class Interface:
                             json=self.params, headers=self.headers)
             self.result = r
             assert(self.result.status_code == 200)
-            self.log.info('Interface %s requested success!' % self.url)
-            self.log.info('Interface %s request and response info:' % self.url+'\n'+
+            self.log('info','Interface %s requested success!' % self.url)
+            self.log('info','Interface %s request and response info:' % self.url+'\n'+
                     '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+Interface.host+' '+self.url+'\n'+
                     '头部\n'+str(self.result.request.headers)+'\n参数\n'+str(self.params)+'\n'+
                     '响应:   '+str(self.result.status_code)+'\n'+'*'*60+'\n'+
@@ -107,8 +115,8 @@ class Interface:
             return True
         except Exception as e:
             self.result = None
-            self.log.error('Interface %s requested failed!' % self.url + '\n' + str(e))
-            self.log.info('Interface %s request and response info:' % self.url+'\n'+
+            self.log('error','Interface %s requested failed!' % self.url + '\n' + str(e))
+            self.log('info','Interface %s request and response info:' % self.url+'\n'+
                     '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+Interface.host+' '+self.url+'\n'+'头部\n'+
                     str(self.headers)+'\n'+'参数\n'+str(self.params))
             return False
@@ -116,7 +124,7 @@ class Interface:
     # 响应结果校验
     def assert_response(self, k_v):
         if self.result == None:
-            self.log.error('Request failed. Assert operation is invailed!')
+            self.log('info','Request failed. Assert operation is invailed!')
             return False
         k_v = self.g_replace(k_v)
         for k in k_v:
@@ -131,10 +139,10 @@ class Interface:
                     obj = self.get_json(k)
                     o_obj = k_v[k]
                 assert(str(obj) == str(o_obj))
-                self.log.info('Assert success!  '
+                self.log('info','Assert success!  '
                             +k+': '+str(o_obj)+' | '+str(o_obj))
             except:
-                self.log.error('Assert failed!  '
+                self.log('error','Assert failed!  '
                              +k+' : '+str(o_obj)+' | '+str(obj))
                 return False
         return True
@@ -145,7 +153,7 @@ class Interface:
             tmp = self.result.json()
         except:
             return None
-            self.log.error('Get_json! '+ str(self.result.content))
+            self.log('error','Get_json! '+ str(self.result.content))
         try:
             for elem in key.split('.'):
                 if elem == '*r':
@@ -168,13 +176,13 @@ class Interface:
                         self.g[k] = [self.g[k], 1]
                         self.g[k+'1'] = self.g[k][0]
                     self.g[k+str(self.g[k][1]+1)] = self.get_json(k)
-                    self.log.info('G push values: ' + str(k)+':' + str(self.g[k+str(self.g[k][1]+1)]))
+                    self.log('info','G push values: ' + str(k)+':' + str(self.g[k+str(self.g[k][1]+1)]))
                     self.g[k][1] = self.g[k][1] + 1
                 else:
                     self.g[k] = self.get_json(k)
-                    self.log.info('G push values: ' + str(k)+':'+str(self.g[k]))
+                    self.log('info','G push values: ' + str(k)+':'+str(self.g[k]))
         except:
-            self.log.error('G_push failed! '+ str(key_list) + str(self.g))
+            self.log('error','G_push failed! '+ str(key_list) + str(self.g))
           
         
     # 全局参数替换
@@ -204,7 +212,7 @@ class Interface:
             return k_v
         except:
             return c_
-            self.log.error('G_replace failed! '+ str(c_) + str(k_v))
+            self.log('error','G_replace failed! '+ str(c_) + str(k_v))
 
     # 特殊参数动态生成（主要是时间类）
     @staticmethod
@@ -235,7 +243,7 @@ class Interface:
 
 # 登陆获取cookie，并保存到Interfa的类变量中
 def set_cookie(interface_name, project, data=None):
-    i = interf(interface_name, project)
+    i = interf(interface_name, project, g={}, log=False)
     if data:
         i.modify_params(data)
     i.request()
@@ -244,7 +252,7 @@ def set_cookie(interface_name, project, data=None):
     
 
 # 从数据库api表中读取接口参数，并实例化对象
-def interf(interface_name, project, g={}):
+def interf(interface_name, project, g={}, log=True):
     db = sqlite3.connect(Interface.db_path)
     result = db.execute('select method,url,data'
                   ' from api where project_name="%s" and name="%s"'
@@ -253,7 +261,7 @@ def interf(interface_name, project, g={}):
     tmp[2] = json.loads(tmp[2])
     for key in tmp[2]:
         tmp[2][key] = tmp[2][key]['value']
-    return Interface(*tmp, g=g)
+    return Interface(*tmp, g=g, log=log)
 
 
 # 图片base64编码

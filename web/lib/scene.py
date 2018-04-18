@@ -52,7 +52,8 @@ class Scene:
             try:
                 c = Case(*elem, g=self.g, s=self.name)
                 result.append(c.run())
-            except:
+            except Exception as e:
+                print(e)
                 result.append((elem[1], 0, ''))
             self.status.append(result[-1][1][0] and result[-1][1][1])
         return self.name, result, 1 if all(self.status) else 0
