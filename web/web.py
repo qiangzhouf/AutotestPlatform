@@ -1,4 +1,5 @@
-#!python -u
+# coding:utf-8
+from gevent import monkey; monkey.patch_all()
 import sys
 import os
 sys.path.append(os.getcwd()+'/lib')
@@ -19,7 +20,6 @@ from threading import Lock, Thread
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
-from gevent import monkey; monkey.patch_all()
 from interface import *
 from task import *
 
@@ -28,7 +28,7 @@ from task import *
 DATABASE = 'web.db'
 SECRET_KEY = 'zhouqiang'
 USERNAME = 'admin'
-PASSWORD = 'intedio'
+PASSWORD = '123'
 # 推送线程和锁和队列
 thread = None
 thread_lock = Lock()
@@ -227,18 +227,23 @@ def teardown_request(exception):
         pass
 
 
-# 首页---展示所有任务
+# 首页
 @app.route('/')
-def show_tasks():
+def index():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     return redirect(url_for('api_record'))
-    '''
-    暂时重定向到接口测试页面，UI自动化不开启
+
+
+# 展示所有任务
+@app.route('/task')
+def show_tasks():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     tasks = g.db.execute('select * from tasks order by id desc').fetchall()
     case_sets = g.db.execute('select name from case_set order by id desc').fetchall()
     return render_template('show_tasks.html', task=tasks, case_set=case_sets)
-    '''
+    
 
 # 登陆
 @app.route('/login', methods=['GET', 'POST'])
@@ -250,7 +255,7 @@ def login():
             flash('密码不正确', 'danger')
         else:
             session['logged_in'] = True
-            return redirect(url_for('show_tasks'))
+            return redirect(url_for('index'))
     return render_template('login.html', menu='none')
 
 
@@ -580,37 +585,18 @@ def api_test():
     # 获取post传递过来的参数
     project_name = request.form['project']
     try:
-        pak_name = json.loads(request.form['pak'])['object_name']
-        pak = json.loads(request.form['pak'])['type']
         req_host = request.form['host']
         req_url = 'http://' + req_host + request.form['url']
         req_method = request.form['method']
     except:
-        pak = 'none'
         api_name = request.form['name']
         req_host  = g.db.execute('select host from project where name="%s";' % project_name).fetchall()[0][0]
         req_method, req_url = g.db.execute('select method, url from api where name="%s" and project_name="%s";' % (api_name, project_name)).fetchall()[0]
         req_url = 'http://' + req_host + req_url
-    
-    # 一所视图库项目需要在json对象外层包裹object, objectlist的特殊处理
-    if request.form['data'] == '""':
+    try:
+        req_data = json.loads(request.form['data'])
+    except:
         req_data = {}
-    else:
-        if pak == 'Object':
-            req_data = {pak_name+'Object': json.loads(request.form['data'])}
-        elif pak == 'ListObject':
-            if isinstance(json.loads(request.form['data']), list):
-                if pak_name in ['VideoSlice', 'File', 'Image', 'Case']:
-                    req_data = { pak_name+'ListObject': {pak_name: json.loads(request.form['data']) }}
-                else:
-                    req_data = { pak_name+'ListObject': {pak_name+'Object': json.loads(request.form['data']) }}
-            else:
-                if pak_name in ['VideoSlice', 'File', 'Image']:
-                    req_data = { pak_name+'ListObject': {pak_name: [json.loads(request.form['data']) ]}}
-                else:
-                    req_data = { pak_name+'ListObject': {pak_name+'Object': [json.loads(request.form['data']) ]}}
-        else:
-            req_data = json.loads(request.form['data'])
     
     # 关键字替换变量
     Interface.dynamic_params(req_data)
@@ -636,6 +622,16 @@ def api_test():
         #print('cookie设置失败',project_name,r,Interface.cookie)
         pass
     req_headers['Cookie'] = Interface.cookie
+    
+    # url中{}的参数替换
+    if '{' in req_url:
+        tmp = req_url.split('{')
+        #print(tmp)
+        for i in range(1, len(tmp)):
+            tmp_key = tmp[i].split('}')[0]
+            req_url = req_url.replace('{%s}' % tmp_key, req_data[tmp_key])
+            del req_data[tmp_key]
+    #print(req_url)
     
     # 进行请求
     try:
@@ -754,13 +750,11 @@ def project_api():
         return jsonify(api=tmp)
     elif request.form['get'] == 'single_api':
         api = g.db.execute('select * from api where name="%s";' % request.form['api_name']).fetchall()[0]
-        return jsonify({'method':api[3], 'url':api[4], 'data':api[5], 'headers':api[6], 'auth':api[7], 'assert_data':api[8], 'host': api[9], 'pak': api[10]})
+        return jsonify({'method':api[3], 'url':api[4], 'data':api[5], 'headers':api[6], 'auth':api[7], 'assert_data':api[8], 'host': api[9]})
     elif request.form['get'] == 'api_data':
         project = request.form['project_name']
         api = request.form['api_name']
         data = json.loads(g.db.execute('select data from api where name="%s" and project_name="%s";' % (api, project)).fetchall()[0][0])
-        for key in data:
-            data[key] = data[key]['value']
         assert_data = json.loads(g.db.execute('select assert from api where name="%s" and project_name="%s";' % (api, project)).fetchall()[0][0])
         for key in assert_data:
             assert_data[key] = assert_data[key]['assert_value']
@@ -776,7 +770,6 @@ def project_api():
         
 @app.route('/api_save', methods=['POST'])
 def api_save():
-    pak = request.form['pak']
     flag = request.form['flag']
     req_host = request.form['host']
     req_api_name = request.form['api_name']
@@ -794,7 +787,7 @@ def api_save():
         if len(obj):
             return jsonify(code=500, msg='接口重名')
         try:
-            g.db.execute("insert into api (name, project_name, method, url, data, headers, auth, assert, host, coloum) values('%s','%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s');" % (req_api_name, req_project_name, req_method, req_url, req_data, req_headers, req_auth, req_assert_data, req_host, pak))
+            g.db.execute("insert into api (name, project_name, method, url, data, headers, auth, assert, host) values('%s','%s', '%s', '%s', '%s','%s', '%s', '%s', '%s');" % (req_api_name, req_project_name, req_method, req_url, req_data, req_headers, req_auth, req_assert_data, req_host))
             g.db.commit()
             return jsonify(code=200)
         except Exception as msg:
@@ -805,7 +798,7 @@ def api_save():
         if not len(obj):
             return jsonify(code=500, msg='接口不存在，无法修改')
         try:
-            g.db.execute("update api set method='%s', url='%s', data='%s', headers='%s', auth='%s', assert='%s', host='%s', coloum='%s'where name='%s' and project_name='%s';" % (req_method, req_url, req_data, req_headers, req_auth, req_assert_data, req_host, pak, req_api_name, req_project_name))
+            g.db.execute("update api set method='%s', url='%s', data='%s', headers='%s', auth='%s', assert='%s', host='%s' where name='%s' and project_name='%s';" % (req_method, req_url, req_data, req_headers, req_auth, req_assert_data, req_host, req_api_name, req_project_name))
             g.db.commit()
             return jsonify(code=200)
         except Exception as msg:

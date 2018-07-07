@@ -324,7 +324,13 @@ $(function(){
             $(this).attr('style', $(this).attr('style').replace(/background-color:#FFB5C5;/g, ''))
         }
         catch(err){
-            $(this).attr('style', 'background-color:#FFB5C5;'+$(this).attr('style'))
+            if ($(this).val() == ''){
+                $(this).attr('style', $(this).attr('style').replace(/background-color:#FFB5C5;/g, ''))
+            }
+            else{
+                $(this).attr('style', 'background-color:#FFB5C5;'+$(this).attr('style'))
+            }
+            
         }
     });
     

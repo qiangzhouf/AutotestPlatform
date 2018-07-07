@@ -81,50 +81,7 @@
     <div class="row" style="height:10px;"></div>
     <div class="row">
       <div class="col-md-12 collapse" id="params">
-          <div class="row" style="height:5px;"></div>
-             <label class="radio-inline" style="margin:3px 0px">
-                <input type="radio" name='pak' id="options1" value="None" checked> None
-            </label>
-            <label class="radio-inline" style="margin:3px 0px">
-                <input type="radio" name='pak' id="options2"  value="Object"> Object
-            </label>
-            <label class="radio-inline" style="margin:3px 0px">
-                <input type="radio" name='pak' id="options3"  value="ListObject"> ListObject
-            </label>
-              <div class="radio-inline" >
-                    <div name="list_num" style="display: none;">
-                <button class="btn btn-default" id="add_list" style="padding:0px 8px"><font size="4">+</font></button>
-                 <button class="btn btn-default" id="del_list" style="padding:0px 8px"><font size="4">-</font></button>
-            </div>
-                </div>
-              <div class="radio-inline" >
-                    <div name="pak_name" style="display: none;">
-                        
-                        <label class="radio-inline" >对象名:<input id="pak_name"/></label>
-                    </div>
-                </div>
-          <label class="radio-inline" style="margin:3px 0px">
-                 参数个数：<span id=count_data></span>
-            </label>
-          <div class="row" style="height:10px;"></div>
-          <div class="list">
-            <div style="padding:0px 16px 0px 0px">
-              <table class="table table-condensed table-bordered" id="data_h" style="margin:0px">
-                  <tr class="active">
-                      <td style="width:18%">键（Key）</td>
-                      <td style="width:18%">值（Value）</td>
-                      <td style="width:18%">描述（Description）</td>
-                      <td style="width:18%">必要性（R/O）</td>
-                      <td style="width:18%">参数约束（Range）</td>
-                      <td style="width:10%" align="center"><button class="btn btn-default" id="add_json" style="padding:0px 8px"><font size="4">+</font></button>&nbsp;&nbsp;<button class="btn btn-default" id="del_alldata" style="padding:0px 8px"><font size="3">x</font></button></td>
-                  </tr>
-              </table>
-            </div>  
-            <div style="height:230px;overflow-y:auto;overflow-x:hidden;">
-              <table class="table table-condensed table-bordered" id="data"><tr></tr>
-              </table>
-            </div>
-          </div>
+         <textarea style="height:300px;width:100%" id="new_data"></textarea>
       </div>
         <div class="row" style="height:10px;"></div>
    </div>

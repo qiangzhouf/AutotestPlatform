@@ -1,3 +1,4 @@
+# coding:utf-8
 import sqlite3
 from case import *
 from interface import *
@@ -38,8 +39,8 @@ class Scene:
         try:
             s = sqlite3.connect(Interface.db_path)
             tmp = []
-            for k,v in enumerate(case_name):
-                r = s.execute('select name,data,assert_data,save_data,del_data,pre_time from "case" where name="%s" and s_key=%d' % (v, self.s_key)).fetchall()[case_name[:k].count(v)]
+            for i,v in enumerate(case_name):
+                r = s.execute('select name,data,assert_data,save_data,del_data,pre_time from "case" where name="%s" and s_key=%d' % (v, self.s_key)).fetchall()[case_name[:i].count(v)]
                 r = list(r)
                 r.insert(0, self.project)
                 tmp.append(r)
@@ -58,7 +59,7 @@ class Scene:
                 result.append(c.run())
             except Exception as e:
                 print(traceback.format_exc())
-                result.append((elem[1], 0, ''))
+                result.append((elem[1], 0, '', c.del_data))
             self.status.append(result[-1][1][0] and result[-1][1][1])
         return self.name, result, 1 if all(self.status) else 0
     

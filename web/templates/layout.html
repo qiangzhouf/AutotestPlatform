@@ -32,25 +32,30 @@
 	<div class="col-md-1" style="padding:0px;display:{{menu}};">
         <div style="padding:0px;margin:50px 50px 0px 0px;background:#E9E9E9;height:100%;width:8%;position:fixed">
             <div class="list-group" style="font-size:14px;font-family:Microsoft Yahei">
-                <!--  UI自动化入口暂时屏蔽
+               
               <button id='menu1' class="list-group-item active" style="background:#E9E9E9;border-color: #E9E9E9;color: #205081;">
-                  <b>UI自动化测试 </b><span class="caret"></span>
-              </button>
-              <a href="{{url_for('show_tasks')}}" class="list-group-item menu1">&nbsp;&nbsp;任务管理</a>
-              <a href="{{url_for('case_set')}}" class="list-group-item  menu1">&nbsp;&nbsp;用例集设置</a>
-              <a href="{{url_for('page_ab')}}" class="list-group-item  menu1">&nbsp;&nbsp;页面抽象</a>
-              <a href="{{url_for('model')}}" class="list-group-item  menu1">&nbsp;&nbsp;模板编写</a> -->
-              <button id='menu2' class="list-group-item active" style="background:#E9E9E9;border-color: #E9E9E9;color: #205081;">
                  <b>http接口测试 </b><span class="caret"></span>
               </button>
-              <a href="{{url_for('api_record')}}" class="list-group-item  menu2">&nbsp;&nbsp;接口录入</a>
-              <a href="{{url_for('interf_scene')}}" class="list-group-item  menu2">&nbsp;&nbsp;场景编写</a>
-              <a href="{{url_for('suite')}}" class="list-group-item  menu2">&nbsp;&nbsp;测试套管理</a>
-              <a href="{{url_for('interf_task')}}" class="list-group-item  menu2">&nbsp;&nbsp;任务执行</a>
-              <button id='menu3' class="list-group-item active" style="background:#E9E9E9;border-color: #E9E9E9;color: #205081;">
+              <a href="{{url_for('api_record')}}" class="list-group-item  menu1">&nbsp;&nbsp;接口录入</a>
+              <a href="{{url_for('interf_scene')}}" class="list-group-item  menu1">&nbsp;&nbsp;场景编写</a>
+              <a href="{{url_for('suite')}}" class="list-group-item  menu1">&nbsp;&nbsp;测试套管理</a>
+              <a href="{{url_for('interf_task')}}" class="list-group-item  menu1">&nbsp;&nbsp;任务执行</a>
+              
+                
+              <button id='menu2' class="list-group-item active" style="background:#E9E9E9;border-color: #E9E9E9;color: #205081;">
+                  <b>UI自动化测试 </b><span class="caret"></span>
+              </button>
+              
+              <a href="{{url_for('page_ab')}}" class="list-group-item  menu2">&nbsp;&nbsp;页面抽象</a>
+              <a href="{{url_for('model')}}" class="list-group-item  menu2">&nbsp;&nbsp;模板编写</a>
+                
+              <a href="{{url_for('case_set')}}" class="list-group-item  menu2">&nbsp;&nbsp;用例集设置</a>
+              <a href="{{url_for('show_tasks')}}" class="list-group-item menu2">&nbsp;&nbsp;任务管理</a>
+                
+                <button id='menu3' class="list-group-item active" style="background:#E9E9E9;border-color: #E9E9E9;color: #205081;">
                  <b>系统配置</b><span class="caret"></span>
               </button>
-              <a href="{{url_for('project_m')}}" class="list-group-item  menu3">&nbsp;&nbsp;项目管理</a>
+                <a href="{{url_for('project_m')}}" class="list-group-item  menu3">&nbsp;&nbsp;项目管理</a>
             </div>
 			</div>
 	</div>
@@ -94,7 +99,7 @@
 			<div class="row">
 				<div class="col-md-2"></div>
 				<div class="col-md-6" style="text-align:right">
-				Copyright &copy; 2017 北京深瞐科技 - 武汉睿智视讯测试组. All rights reserved.
+				Copyright &copy; 2018 商汤科技. All rights reserved.
 				</div>
 				<div class="col-md-2"></div>
 			</div>

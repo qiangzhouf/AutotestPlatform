@@ -1,3 +1,4 @@
+# coding:utf-8
 from scene import *
 import sqlite3
 import threading
@@ -37,6 +38,7 @@ class Task:
         user_passwd = self.db('select user_passwd from project where name="%s"' % (self.project))[0][0]
         if user_passwd:
             user_passwd = json.loads(user_passwd)
+        
         set_cookie('公共-用户-用户登录', self.project, user_passwd)
         
         count=0
@@ -86,10 +88,13 @@ class Task:
     # 并发执行
     def mutil_pro(self):
         # 环境准备
-        user_passwd = self.db('select user_passwd from project where name="%s"' % (self.project))[0][0]
-        if user_passwd:
-            user_passwd = json.loads(user_passwd)
-        set_cookie('公共-用户-用户登录', self.project, user_passwd)
+        try:
+            user_passwd = self.db('select user_passwd from project where name="%s"' % (self.project))[0][0]
+            if user_passwd:
+                user_passwd = json.loads(user_passwd)
+            set_cookie('公共-用户-用户登录', self.project, user_passwd)
+        except:
+            pass
         
         # 线程池任务映射
         with concurrent.futures.ThreadPoolExecutor(max_workers=50) as e:

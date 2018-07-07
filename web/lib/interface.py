@@ -1,3 +1,4 @@
+# coding:utf-8
 '''
 接口类：实现接口参数化操作
 支持：
@@ -70,9 +71,12 @@ class Interface:
 
     # 参数修改
     def modify_params(self,k_v):
+        if k_v == '' or k_v == None:
+            k_v = {}
+            return
         try:
             Interface.dynamic_params(k_v)
-            k_v = self.g_replace(k_v)
+            self.g_replace(k_v)
 
         except:
             print(traceback.format_exc())
@@ -81,12 +85,23 @@ class Interface:
     # 下发接口
     def request(self):
         try:
+            # url中{}的参数替换
+            if '{' in self.url:
+                tmp = self.url.split('{')
+                for i in range(1, len(tmp)):
+                    tmp_key = tmp[i].split('}')[0]
+                    self.url = self.url.replace('{%s}' % tmp_key, self.params[tmp_key])
+                    del self.params[tmp_key]
+
             if Interface.cookie:
                 self.headers['Cookie'] = Interface.cookie  
             if self.method == 'GET':
-                r = requests.get(Interface.protocol+Interface.host+self.url, 
+                r = requests.request(self.method, Interface.protocol+Interface.host+self.url, 
                             params=self.params, headers=self.headers)
-            elif self.method == 'POST':
+            elif self.method == 'DELETE':
+ 
+                r = requests.request(self.method, Interface.protocol+Interface.host+self.url, headers=self.headers)
+            elif self.method == 'POST' or self.method == 'PUT':
                 files = {}
                 for key in self.params:
                     if isinstance(self.params[key], str):
@@ -96,13 +111,12 @@ class Interface:
                 for key in files:
                     del self.params[key]
                 if files:
-                    r = requests.post(Interface.protocol+Interface.host+self.url, 
+                    r = requests.request(self.method, Interface.protocol+Interface.host+self.url, 
                             params=self.params, files=files, headers=self.headers)
                 else:
-                    r = requests.post(Interface.protocol+Interface.host+self.url, 
+                    r = requests.request(self.method, Interface.protocol+Interface.host+self.url, 
                             json=self.params, headers=self.headers)
             self.result = r
-            assert(self.result.status_code == 200)
             self.log('info','Interface %s requested success!' % self.url)
             self.log('info','Interface %s request and response info:' % self.url+'\n'+
                     '请求:'+'\n'+'*'*60+'\n'+self.method+'  '+Interface.host+' '+self.url+'\n'+
@@ -123,7 +137,8 @@ class Interface:
         if self.result == None:
             self.log('info','Request failed. Assert operation is invailed!')
             return False
-        k_v = self.g_replace(k_v)
+ 
+        self.g_replace(k_v)
         for k in k_v:
             try:
                 if k == 'status_code':
@@ -133,11 +148,12 @@ class Interface:
                     obj = self.result.headers[k.split('.')[1]]
                     o_obj = k_v[k]
                 else:
+                    
                     obj = self.get_json(k)
                     o_obj = k_v[k]
                 assert(str(obj) == str(o_obj))
                 self.log('info','Assert success!  '
-                            +k+': '+str(o_obj)+' | '+str(o_obj))
+                            +k+': '+str(o_obj)+' | '+str(obj))
             except:
                 #print(traceback.format_exc())
                 self.log('error','Assert failed!  '
@@ -163,66 +179,95 @@ class Interface:
                     tmp = tmp[elem]
             return tmp
         except:
-            #print(traceback.format_exc())
+            print(traceback.format_exc())
             return None
         
     
     # 保存过程值
     def g_push(self, key_list):
+        # print(self.g)
         try:
             for k in key_list:
                 if k in self.g:
-                    if not isinstance(self.g[k], list):
-                        self.g[k] = [self.g[k], 1]
-                        self.g[k+'1'] = self.g[k][0]
-                    self.g[k+str(self.g[k][1]+1)] = self.get_json(k)
-                    self.log('info','G push values: ' + str(k)+':' + str(self.g[k+str(self.g[k][1]+1)]))
-                    self.g[k][1] = self.g[k][1] + 1
+                    if k+'0' not in self.g:
+                        self.g[k+'0'] = 1
+                        self.g[k+'1'] = self.g[k]
+                    if isinstance(self.get_json(k), dict) or isinstance(self.get_json(k), list):
+                        self.g[k+str(self.g[k+'0']+1)] = json.dumps(self.get_json(k))
+                    else:
+                        self.g[k+str(self.g[k+'0']+1)] = self.get_json(k)
+                    self.log('info','G push values: ' + str(k)+':' + str(self.g[k+str(self.g[k+'0']+1)]))
+                    self.g[k+'0'] = self.g[k+'0'] + 1
                 else:
-                    self.g[k] = self.get_json(k)
+                    if isinstance(self.get_json(k), dict) or isinstance(self.get_json(k), list):
+                        self.g[k] = json.dumps(self.get_json(k))
+                    else:
+                        self.g[k] = self.get_json(k)
                     self.log('info','G push values: ' + str(k)+':'+str(self.g[k]))
+                    # self.log('info',str(self.g))
         except:
-            #print(traceback.format_exc())
-            self.log('error','G_push failed! '+ str(key_list) + str(self.g))
+            print(traceback.format_exc())
+            self.log('error','G_push failed! '+ str(key_list) + '  ' + str(self.g))
           
         
     # 全局参数替换
     def g_replace(self, k_v):
-        c_ = k_v.copy()
         try:
             for k in k_v:
-                if not isinstance(k_v[k], str):
-                    continue
-                if '*g.' in k_v[k]:
-                    #print(k, k_v[k])
-                    tmp_v = []
-                    for elem in k_v[k].split(','):
-                        if '..' in elem:
-                            tmp = self.g[elem.split('..')[0].replace('*g.', '')]
-                            for child in elem.split('..')[1].split('.'):
+                if isinstance(k_v[k], list):
+                    for i in range(len(k_v[k])):
+                        if isinstance(k_v[k][i],dict):
+                            self.g_replace(k_v[k][i])
+                elif isinstance(k_v[k], dict):
+                    self.g_replace(k_v[k])
+                elif isinstance(k_v[k], str):
+                    if '*g.' in k_v[k]:
+                        # print(k, k_v[k], '*'*10,'\n')
+                        tmp_v = []
+                        for elem in k_v[k].split(','):
+                            if '..' in elem:
+                                tmp = self.g[elem.split('..')[0].replace('*g.', '')]
+                                for child in elem.split('..')[1].split('.'):
+                                    try:
+                                        tmp = tmp[int(child)]
+                                    except:
+                                        print(traceback.format_exc())
+                                        tmp = tmp[child]
                                 try:
-                                    tmp = tmp[int(child)]
+                                    tmp_v.append(json.loads(tmp))
                                 except:
-                                    print(traceback.format_exc())
-                                    tmp = tmp[child]
-                            tmp_v.append(tmp)
+                                    tmp_v.append(tmp)
+                            else:
+                                try:
+                                    tmp_v.append(json.loads(self.g[elem.replace('*g.', '')]))
+                                except:
+                                    tmp_v.append(self.g[elem.replace('*g.', '')])
+                        if len(tmp_v) > 1:
+                            k_v[k] = ','.join([str(elem) for elem in tmp_v])
                         else:
-                            tmp_v.append(self.g[elem.replace('*g.', '')])
-                    #print(k, tmp_v)
-                    k_v[k] = ','.join([str(elem) for elem in tmp_v])
-            #print(k_v,'\n')
-            return k_v
+                            try:
+                                k_v[k] = json.loads(tmp_v[0])
+                            except:
+                                k_v[k] = tmp_v[0]
+  
         except:
-            #print(traceback.format_exc())
-            return c_
-            self.log('error','G_replace failed! '+ str(c_) + str(k_v))
+            print(traceback.format_exc())
+            self.log('error','G_replace failed! '+ str(k_v))
 
     # 特殊参数动态生成（主要是时间类）
     @staticmethod
     def dynamic_params(params):
         for key in params:
+            #print(key)
             if not isinstance(params[key], str):
-                continue
+                if isinstance(params[key], list):
+                    for i in range(len(params[key])):
+                        if isinstance(params[key][i],dict):
+                            Interface.dynamic_params(params[key][i])
+                elif isinstance(params[key], dict):
+                    Interface.dynamic_params(params[key])
+                else:
+                    continue
 
             if params[key] == '*now':
                 params[key] = int(time.time()*1000)
@@ -241,7 +286,11 @@ class Interface:
                 interval = int(float(params[key].split('-')[1])*3600*1000)
                 params[key] = int(time.time()*1000) - interval
             elif '*base64.' in params[key]:
-                    params[key] = img_b64(os.getcwd() + '/image/'+ params[key].replace('*base64.', ''))
+                params[key] = img_b64(os.getcwd() + '/image/'+ params[key].replace('*base64.', ''))
+            elif params[key] == 'true':
+                params[key] = True
+            elif params[key] == 'false':
+                params[key] = False
 
 
 # 登陆获取cookie，并保存到Interfa的类变量中
@@ -262,8 +311,6 @@ def interf(interface_name, project, g={}, log=True):
                   % (project, interface_name))
     tmp = list(result.fetchall()[0])
     tmp[2] = json.loads(tmp[2])
-    for key in tmp[2]:
-        tmp[2][key] = tmp[2][key]['value']
     return Interface(*tmp, g=g, log=log)
 
 

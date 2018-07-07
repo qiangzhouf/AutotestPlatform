@@ -1,3 +1,4 @@
+# coding:utf-8
 import uuid
 import time
 import json
@@ -63,5 +64,5 @@ class Case:
             print(traceback.format_exc())
             pass
             
-        return self.name, self.status, self.interface.log_file
+        return self.name, self.status, self.interface.log_file, self.del_data
     
