@@ -1,7 +1,4 @@
 # AutotestPlatform（自动化测试平台）
-### 前言
-    自动化测试平台，该项目于2017.10-2018.2北京深瞐科技公司在职时独立设计开发，组内测试成员使用2个月，使用现状接口规模300个/场景规模100个，UI自动化由于用例构建和维护成本过高，暂时废弃关闭入口。现已离开该公司，可提issue有时间会跟进，后续打算把接口自动化单独拿出来重构。
-
 ### 概述：
 ####        1、接口自动化测试模块：
             单接口录入/测试，多个接口组织场景，多个场景组成测试套，选择测试套进行任务执行和报告生成。
@@ -12,34 +9,12 @@
 
 ### 使用指南：
 <pre><code>
-git clone https://github.com/qiangzhouf/AutotestPlatform.git
+docker pull qiangzhou/autotest_platform:v1.0
+docker run -dit --name autotest_platform --net host qiangzhou/autotest_platform:v1.0 uwsgi -i uwsgi.ini
 
 </pre></code>
-<pre><code>
-# python3.5, 安装下述三方库
 
-pip install selenium
-pip install flask
-pip install flask_socketio
-pip install requests
-pip install uwsgi
-pip install gevent
 
-</code></pre>
-<pre><code>
-# 运行UI自动化测试服务
-
-python3 server.py
-
-</code></pre>
-<pre><code>
-# 启动web服务,启动时可自定义uwsgi.ini配置
-
-cd AutotestPlatform/web
-uwsgi -i uwsgi.ini
-
-（启动成功后，即可访问自动化测试平台(admin/intedio),账户密码在wep.py里配置，暂无用户管理）
-</code></pre>
 
 ### 示例：
 #### 接口自动化测试模块
