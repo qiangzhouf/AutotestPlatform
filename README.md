@@ -11,7 +11,7 @@
 <pre><code>
 docker pull qiangzhou/autotest_platform:v1.0
 docker run -dit --name autotest_platform --net host qiangzhou/autotest_platform:v1.0 bash -c "cd /opt/AutotestPlatform/web/ && uwsgi -i uwsgi.ini"
-
+# 浏览器访问<ip>:8080，登陆密码admin/123
 </pre></code>
 
 
