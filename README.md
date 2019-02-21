@@ -9,7 +9,7 @@
 
 ### 使用指南：
 <pre><code>
-docker pull qiangzhou/autotest_platform:1.1
+docker pull qiangzhou/autotest_platform:v1.0
 docker run -dit --name autotest_platform --net host qiangzhou/autotest_platform:v1.0 bash -c "cd /opt/AutotestPlatform/web/ && uwsgi -i uwsgi.ini"
 
 # 浏览器访问http://ip:8080
