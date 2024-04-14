@@ -5,7 +5,7 @@ Flask==1.0.2
 Flask-SocketIO==3.0.0
 gevent==1.2.2
 greenlet==0.4.13
-idna==2.6
+idna==3.7
 itsdangerous==0.24
 Jinja2==2.11.3
 MarkupSafe==1.0
