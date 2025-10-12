@@ -10,7 +10,7 @@ itsdangerous==0.24
 Jinja2==2.11.3
 MarkupSafe==1.0
 python-engineio==3.9.0
-python-socketio==1.9.0
+python-socketio==5.14.0
 requests==2.20
 selenium==3.12.0
 six==1.11.0
